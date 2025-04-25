@@ -1,7 +1,7 @@
 import Sidebar from './Sidebar'
 import { useState } from "react";
 import {useAuth} from "../components/AuthContext"
-import PurchaseList from "../components/PurchaseList";
+import PurchaseList from "../components/InternalManager/PurchaseList";
 
 export default function Layout()
 {

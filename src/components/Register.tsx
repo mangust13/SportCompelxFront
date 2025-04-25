@@ -1,6 +1,7 @@
+import axios from "axios";
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import axios from "axios";
+import { useAuth } from "./AuthContext";
 
 export default function Register() {
   const [username, setUsername] = useState("");
@@ -8,6 +9,7 @@ export default function Register() {
   const [role, setRole] = useState("Trainer");
   const [error, setError] = useState("");
   const navigate = useNavigate();
+  const {login} = useAuth();
 
   const handleRegister = async () => {
     try {
@@ -16,7 +18,17 @@ export default function Register() {
         password,
         roleName: role
       });
-      navigate("/login");
+
+      const loginResponse = await axios.post("https://localhost:7270/api/auth/login", {
+        username,
+        password
+      })
+
+      const user = loginResponse.data;
+      login(user);
+      localStorage.setItem('user', JSON.stringify(user));
+
+      navigate(`/${user.role.toLowerCase()}`);
     } catch (err: any) {
         if (err.response?.data) setError(err.response.data);
     }

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import axios from 'axios'
-import { PurchaseDto } from '../constants/types'
+import { PurchaseDto } from '../../constants/types'
 import PurchaseCard from './PurchaseCard'
 import PurchaseHeader from './PurchaseHeader'
 

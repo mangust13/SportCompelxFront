@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
-import { PurchaseDto } from '../constants/types'
-import { highlightMatch } from '../constants/highlightMatch'
+import { PurchaseDto } from '../../constants/types'
+import { highlightMatch } from '../../constants/highlightMatch'
 import EditPurchaseModal from './EditPurchaseModal'
 
 type Props = {

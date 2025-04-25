@@ -3,8 +3,7 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "./components/AuthContext";
 
 import Login from "./components/Login";
-import Register from './components/Register';
-
+import Register from "./components/Register";
 import Layout from "./layout/Layout";
 
 export default function App() {
@@ -21,20 +20,45 @@ export default function App() {
         }
       } catch (e) {
         console.error("Помилка при читанні user з localStorage:", e);
-        localStorage.removeItem("user"); // на всякий випадок
+        localStorage.removeItem("user");
       }
       initialized.current = true;
     }
   }, [login]);
-  
+
+  if (!user) {
+    return (
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="*" element={<Navigate to="/login" replace />} />
+      </Routes>
+    );
+  }
+
+  const userRolePath = user.role.toLowerCase(); // напр. "trainer", "internalmanager", "purchasemanager"
+
   return (
     <Routes>
-      <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
+      <Route path="/login" element={<Navigate to={`/${userRolePath}`} replace />} />
+      <Route path="/register" element={<Navigate to={`/${userRolePath}`} replace />} />
+
+      {/* доступні роуті для кожного */}
       <Route
-        path="/*"
-        element={user ? <Layout /> : <Navigate to="/login" replace />}
+        path="/trainer"
+        element={user.role === "Trainer" ? <Layout /> : <Navigate to={`/${userRolePath}`} />}
       />
+      <Route
+        path="/internalmanager"
+        element={user.role === "InternalManager" ? <Layout /> : <Navigate to={`/${userRolePath}`} />}
+      />
+      <Route
+        path="/purchasemanager"
+        element={user.role === "PurchaseManager" ? <Layout /> : <Navigate to={`/${userRolePath}`} />}
+      />
+
+      {/* fallback: якщо щось інше — редірект на свою роль */}
+      <Route path="*" element={<Navigate to={`/${userRolePath}`} />} />
     </Routes>
   );
 }

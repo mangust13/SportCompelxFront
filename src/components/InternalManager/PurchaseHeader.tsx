@@ -93,10 +93,9 @@ export default function PurchaseHeader({ total, isFilterOpen, setIsFilterOpen, s
               <p className="font-semibold mb-1">Час відвідування:</p>
               <select className="border rounded px-2 py-1 w-full">
                 <option value="">Всі</option>
-                <option value="Morning">Ранок</option>
-                <option value="Day">День</option>
-                <option value="Evening">Вечір</option>
-                <option value="Unlimited">Без обмежень</option>
+                <option value="Morning">Ранковий</option>
+                <option value="Вечірній">Вечірній</option>
+                <option value="Безлімітний">Безлімітний</option>
               </select>
             </div>
 
