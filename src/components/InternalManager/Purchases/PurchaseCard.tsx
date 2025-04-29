@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
-import { PurchaseDto } from '../../constants/types'
-import { highlightMatch } from '../../constants/highlightMatch'
+import { PurchaseDto } from '../../../constants/types'
+import { highlightMatch } from '../../../constants/highlightMatch'
 import EditPurchaseModal from './EditPurchaseModal'
 
 type Props = {
@@ -73,6 +73,8 @@ export default function PurchaseCard({
           {highlightMatch(purchase.subscriptionName, searchTerm)}
         </h3>
         <p className="text-sm text-gray-700">Ціна: {purchase.subscriptionTotalCost} грн</p>
+        <p className="text-sm text-gray-700">Оплата: {highlightMatch(purchase.paymentMethod, searchTerm)}</p>
+
         <p className="text-sm text-gray-700">
           Термін: {highlightMatch(purchase.subscriptionTerm, searchTerm)} | Час:{' '}
           {highlightMatch(purchase.subscriptionVisitTime, searchTerm)}
@@ -84,7 +86,6 @@ export default function PurchaseCard({
         <p><span className="font-semibold">Клієнт:</span> {highlightMatch(purchase.clientFullName, searchTerm)}</p>
         <p><span className="font-semibold">Стать:</span> {highlightMatch(purchase.clientGender, searchTerm)}</p>
         <p><span className="font-semibold">Телефон:</span> {highlightMatch(purchase.clientPhoneNumber, searchTerm)}</p>
-        <p><span className="font-semibold">Оплата:</span> {highlightMatch(purchase.paymentMethod, searchTerm)}</p>
       </div>
 
       {/* Види активності */}

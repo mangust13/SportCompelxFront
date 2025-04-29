@@ -1,7 +1,10 @@
 import Sidebar from './Sidebar'
 import { useState } from "react";
 import {useAuth} from "../components/AuthContext"
-import PurchaseList from "../components/InternalManager/PurchaseList";
+import PurchaseList from "../components/InternalManager/Purchases/PurchaseList";
+import SubscriptionList from "../components/InternalManager/SubscriptionList";
+import AttendanceList from "../components/Trainer/AttendanceList";
+
 
 export default function Layout()
 {
@@ -25,9 +28,19 @@ export default function Layout()
         <main className="flex-1 p-6 overflow-auto">
         {!currentTable && <div>Виберіть таблицю</div>}
 
-        {currentTable === "Purchases" && user.role === "InternalManager" && (
+        {currentTable === "Покупки" && user.role === "InternalManager" && (
           <PurchaseList />
         )}
+
+        {currentTable === "Абонементи" && user.role === "InternalManager" && (
+          <SubscriptionList />
+        )}
+
+        {currentTable === "Відвідування" && user.role === "Trainer" && (
+          <AttendanceList />
+        )}
+
+        
 
         {currentTable !== "Purchases" && currentTable && (
           <div>Вміст таблиці: {currentTable}</div>

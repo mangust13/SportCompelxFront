@@ -1,17 +1,11 @@
 export const accessbyRole = {
     Trainer: [
-        "AttendanceRecords",
+        "Відвідування",
         "Gyms",
-        "Schedules",
-        "SportComplexes",
-        "Trainers",
-        "TrainerSchedules",
-        "Trainings"
       ],
     InternalManager: [
-      "Purchases",
-      "Subscriptions",
-      "Activities",
+      "Покупки",
+      "Абонементи",
     ],
     PurchaseManager: [
         "Suppliers",

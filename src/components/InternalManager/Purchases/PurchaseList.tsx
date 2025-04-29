@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import axios from 'axios'
-import { PurchaseDto } from '../../constants/types'
+import { PurchaseDto } from '../../../constants/types'
 import PurchaseCard from './PurchaseCard'
 import PurchaseHeader from './PurchaseHeader'
 
@@ -15,7 +15,7 @@ export default function PurchaseList() {
 
   useEffect(() => {
     axios
-      .get('https://localhost:7270/api/purchase/manager-view', {
+      .get('https://localhost:7270/api/purchase/purchases-view', {
         params: {
           searchTerm
         }

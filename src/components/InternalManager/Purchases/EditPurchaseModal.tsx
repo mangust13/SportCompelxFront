@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { PurchaseDto } from '../constants/types'
+import { PurchaseDto } from '../../../constants/types'
 
 type Props = {
   purchase: PurchaseDto

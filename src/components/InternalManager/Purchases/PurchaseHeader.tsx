@@ -17,8 +17,8 @@ export default function PurchaseHeader({ total, isFilterOpen, setIsFilterOpen, s
             type="text"
             placeholder="Пошук..."
             value={searchTerm}
-      onChange={(e) => setSearchTerm(e.target.value)}
-      className="border rounded px-3 py-1 text-sm"
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="border rounded px-3 py-1 text-sm"
           />
 
           <select className="border rounded px-2 py-1 text-sm">
@@ -29,7 +29,7 @@ export default function PurchaseHeader({ total, isFilterOpen, setIsFilterOpen, s
           </select>
 
           <button
-            onClick={() => setIsFilterOpen(true)}
+            onClick={() => setIsFilterOpen(!isFilterOpen)}
             className="bg-primary text-white text-sm px-3 py-1 rounded hover:opacity-90"
           >
             Фільтри
