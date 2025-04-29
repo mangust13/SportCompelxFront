@@ -13,7 +13,7 @@ export default function AttendanceCard({ attendance }: Props) {
         <span>{new Date(attendance.purchaseDate).toLocaleDateString()}</span>
       </div>
 
-      {/* Підписка */}
+      {/* Абонемента */}
       <div className="mt-2">
         <h3 className="font-bold text-lg text-primary">{attendance.subscriptionName}</h3>
         <p className="text-sm text-gray-700">

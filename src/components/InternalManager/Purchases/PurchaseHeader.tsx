@@ -57,7 +57,7 @@ export default function PurchaseHeader({ total, isFilterOpen, setIsFilterOpen, s
             </div>
 
             <div>
-              <p className="font-semibold mb-1">Вартість підписки (грн):</p>
+              <p className="font-semibold mb-1">Вартість абонемента (грн):</p>
               <div className="flex gap-2">
                 <input type="number" placeholder="від" className="border rounded px-2 py-1 w-full" />
                 <input type="number" placeholder="до" className="border rounded px-2 py-1 w-full" />
@@ -79,7 +79,7 @@ export default function PurchaseHeader({ total, isFilterOpen, setIsFilterOpen, s
             </div>
 
             <div>
-              <p className="font-semibold mb-1">Термін підписки:</p>
+              <p className="font-semibold mb-1">Термін абонемента:</p>
               <select className="border rounded px-2 py-1 w-full">
                 <option value="">Всі</option>
                 <option value="1 month">1 місяць</option>

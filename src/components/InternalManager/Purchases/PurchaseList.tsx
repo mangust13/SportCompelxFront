@@ -73,8 +73,8 @@ export default function PurchaseList() {
         total={allPurchases.length}
         isFilterOpen={isFilterOpen}
         setIsFilterOpen={setIsFilterOpen}
-        searchTerm={searchTerm} // поки не використовуємо
-        setSearchTerm={setSearchTerm} // пусто
+        searchTerm={searchTerm}
+        setSearchTerm={setSearchTerm}
       />
 
       <div className={`grid gap-4 grid-cols-1 md:grid-cols-2 ${isFilterOpen ? 'xl:grid-cols-2' : 'xl:grid-cols-3'} items-start`}>
