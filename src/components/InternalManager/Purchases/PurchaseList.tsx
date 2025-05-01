@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import axios from 'axios'
 import { PurchaseDto } from '../../../constants/types'
 import PurchaseCard from './PurchaseCard'
-import PurchaseHeader from './PurchaseHeader'
+import Header from '../../../layout/Header'
 
 const ITEMS_PER_PAGE = 15
 
@@ -56,7 +56,7 @@ export default function PurchaseList() {
         setCurrentPage(1)
       })
       .catch(err => console.error('Помилка завантаження:', err))
-  }, [trigger])
+  }, [trigger, sortBy, sortOrder])
 
   const totalPages = Math.ceil(allPurchases.length / ITEMS_PER_PAGE)
 
@@ -100,7 +100,8 @@ export default function PurchaseList() {
 
   return (
     <div className={`flex flex-col gap-6 ${isFilterOpen ? 'w-[75%]' : 'w-[100%]'}`}>
-      <PurchaseHeader
+      <Header
+        title="Всього покупок"
         total={allPurchases.length}
         isFilterOpen={isFilterOpen}
         setIsFilterOpen={setIsFilterOpen}
@@ -110,27 +111,113 @@ export default function PurchaseList() {
         setSortBy={setSortBy}
         sortOrder={sortOrder}
         setSortOrder={setSortOrder}
-        activityFilters={activityFilters}
-        setActivityFilters={setActivityFilters}
-        availableActivities={availableActivities}
+        sortOptions={[
+          { value: 'purchaseNumber', label: 'Номер покупки' },
+          { value: 'purchaseDate', label: 'Дата покупки' },
+          { value: 'subscriptionTotalCost', label: 'Ціна абонемента' },
+          { value: 'subscriptionName', label: 'Назва абонемента' }
+        ]}
+        triggerSearch={() => setTrigger(prev => prev +1)}>
+          
+  <div className="flex flex-col gap-4 text-sm text-gray-700">
+    {/* Payment methods */}
+    <p className="font-semibold">Метод оплати:</p>
+    <div className="flex gap-4 flex-wrap">
+      {['Готівка', 'Карта'].map(method => (
+        <label key={method} className="flex items-center gap-1">
+          <input
+            type="checkbox"
+            checked={selectedPaymentMethods.includes(method)}
+            onChange={() =>
+              setSelectedPaymentMethods(prev =>
+                prev.includes(method)
+                  ? prev.filter(m => m !== method)
+                  : [...prev, method]
+              )
+            }
+          />
+          {method}
+        </label>
+      ))}
+    </div>
 
-        selectedPaymentMethods={selectedPaymentMethods}
-        setSelectedPaymentMethods={setSelectedPaymentMethods}
+    {/* Cost */}
+    <div>
+      <p className="font-semibold mb-1">Вартість абонемента (грн):</p>
+      <div className="flex gap-2">
+        <input
+          type="number"
+          placeholder="від"
+          value={minCost ?? ''}
+          onChange={(e) => setMinCost(e.target.value ? Number(e.target.value) : null)}
+          className="border rounded px-2 py-1 w-full"
+        />
+        <input
+          type="number"
+          placeholder="до"
+          value={maxCost ?? ''}
+          onChange={(e) => setMaxCost(e.target.value ? Number(e.target.value) : null)}
+          className="border rounded px-2 py-1 w-full"
+        />
+      </div>
+    </div>
 
-        selectedGender={selectedGender}
-        setSelectedGender={setSelectedGender}
-
-        minCost={minCost}
-        setMinCost={setMinCost}
-
-        maxCost={maxCost}
-        setMaxCost={setMaxCost}
-
-        purchaseDate={purchaseDate}
-        setPurchaseDate={setPurchaseDate}
-
-        triggerSearch={() => setTrigger(prev => prev + 1)}
+    {/* Date */}
+    <div>
+      <p className="font-semibold mb-1">Дата покупки:</p>
+      <input
+        type="date"
+        value={purchaseDate}
+        onChange={(e) => setPurchaseDate(e.target.value)}
+        className="border rounded px-2 py-1 w-full"
       />
+    </div>
+
+    {/* Gender */}
+    <div>
+      <p className="font-semibold mb-1">Стать клієнта:</p>
+      <select
+        value={selectedGender}
+        onChange={(e) => setSelectedGender(e.target.value)}
+        className="border rounded px-2 py-1 w-full"
+      >
+        <option value="">Всі</option>
+        <option value="Чоловік">Чоловік</option>
+        <option value="Жінка">Жінка</option>
+      </select>
+    </div>
+
+    {/* Activities */}
+    <div>
+      <p className="font-semibold mb-1">Види активностей:</p>
+      <div className="flex flex-col gap-1 max-h-40 overflow-y-auto">
+        {availableActivities.map(name => (
+          <label key={name} className="flex items-center gap-1">
+            <input
+              type="checkbox"
+              checked={activityFilters.includes(name)}
+              onChange={() =>
+                setActivityFilters(prev =>
+                  prev.includes(name)
+                    ? prev.filter(a => a !== name)
+                    : [...prev, name]
+                )
+              }
+            />
+            {name}
+          </label>
+        ))}
+      </div>
+    </div>
+
+    <button
+      onClick={() => setTrigger(prev => prev + 1)}
+      className="mt-4 bg-primary text-white w-full py-2 rounded hover:opacity-90"
+    >
+      Застосувати фільтри
+    </button>
+  </div>
+</Header>
 
 
       <div className={`grid gap-4 grid-cols-1 md:grid-cols-2 ${isFilterOpen ? 'xl:grid-cols-2' : 'xl:grid-cols-3'} items-start`}>

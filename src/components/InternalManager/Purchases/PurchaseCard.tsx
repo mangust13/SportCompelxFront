@@ -4,6 +4,7 @@ import { highlightMatch } from '../../../constants/highlightMatch'
 import EditPurchaseModal from './EditPurchaseModal'
 import axios from 'axios'
 import { toast } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
 
 type Props = {
   purchase: PurchaseDto
@@ -27,15 +28,34 @@ export default function PurchaseCard({purchase, searchTerm, expandedCardId, setE
   }
 
   const handleDelete = async () => {
-    if (!confirm(`Ви точно хочете видалити покупку №${purchase.purchaseNumber}?`)) return
-  
-    try {
-      await axios.delete(`https://localhost:7270/api/Purchases/${purchase.purchaseId}`)
-      toast.success('Покупка успішно видалена!')
-      onDelete(purchase.purchaseId)
-    } catch (error) {
-      toast.error('Помилка при видаленні покупки.')
-    }
+    toast.info(
+      <div>
+        Ви точно хочете видалити покупку №{purchase.purchaseNumber}?
+        <div className="flex gap-2 mt-2">
+          <button
+            onClick={async () => {
+              try {
+                await axios.delete(`https://localhost:7270/api/Purchases/${purchase.purchaseId}`)
+                toast.success('Покупка успішно видалена!')
+                onDelete(purchase.purchaseId)
+              } catch (error) {
+                toast.error('Помилка при видаленні покупки.')
+              }
+            }}
+            className="bg-red-500 text-white px-2 py-1 rounded text-xs"
+          >
+            Так, видалити
+          </button>
+          <button
+            onClick={() => toast.dismiss()}
+            className="bg-gray-300 px-2 py-1 rounded text-xs"
+          >
+            Скасувати
+          </button>
+        </div>
+      </div>,
+      { autoClose: false }
+    )
   }
 
   useEffect(() => {
@@ -80,7 +100,7 @@ export default function PurchaseCard({purchase, searchTerm, expandedCardId, setE
         <h3 className="font-bold text-lg text-primary">
           {highlightMatch(purchase.subscriptionName, searchTerm)}
         </h3>
-        <p className="text-sm text-gray-700">Ціна: {purchase.subscriptionTotalCost} грн</p>
+        <p className="text-sm text-gray-700">Ціна: {highlightMatch(purchase.subscriptionTotalCost, searchTerm)} грн</p>
         <p className="text-sm text-gray-700">Оплата: {highlightMatch(purchase.paymentMethod, searchTerm)}</p>
 
         <p className="text-sm text-gray-700">

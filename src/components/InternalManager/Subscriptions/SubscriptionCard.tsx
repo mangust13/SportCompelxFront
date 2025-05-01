@@ -55,7 +55,7 @@ export default function SubscriptionCard({ subscription, searchTerm, expandedCar
       </div>
 
       {/* Основна інформація про підписку */}
-      <p className="text-sm text-gray-700">Ціна: {subscription.subscriptionTotalCost} грн</p>
+      <p className="text-sm text-gray-700">Ціна: {highlightMatch(subscription.subscriptionTotalCost, searchTerm)} грн</p>
       <p className="text-sm text-gray-700">
         Термін: {highlightMatch(subscription.subscriptionTerm, searchTerm)} | Час: {highlightMatch(subscription.subscriptionVisitTime, searchTerm)}
       </p>
