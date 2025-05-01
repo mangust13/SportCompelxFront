@@ -8,13 +8,8 @@ type Props = {
 }
 
 export default function EditPurchaseModal({ purchase, onClose, onSave }: Props) {
-    type Activity = PurchaseDto['activities'][number]
   const [edited, setEdited] = useState<PurchaseDto>(purchase)
-  const [allActivities, setAllActivities] = useState<Activity[]>([])
   const [allSubscriptions, setAllSubscriptions] = useState<string[]>([])
-  const [allTerms, setAllTerms] = useState<string[]>([])
-  const [allTimes, setAllTimes] = useState<string[]>([])
-  const [allGenders, setAllGenders] = useState<string[]>([])
   const [allPayments, setAllPayments] = useState<string[]>([])
 
   useEffect(() => {
@@ -22,31 +17,12 @@ export default function EditPurchaseModal({ purchase, onClose, onSave }: Props) 
 
     // Симулюємо fetch класифікаторів
     setAllSubscriptions(['Premium Basic Cardio', 'Elite Standard Strength', 'Basic Yoga'])
-    setAllTerms(['1 month', '3 months', '6 months', '12 months'])
-    setAllTimes(['Morning', 'Day', 'Evening', 'Unlimited'])
-    setAllGenders(['Male', 'Female'])
-    setAllPayments(['Cash', 'Card', 'Online'])
+    setAllPayments(['Карта', 'Готівка'])
 
-    setAllActivities([
-      { activityName: 'Yoga', activityDescription: 'Relax', activityPrice: 10, activityTypeAmount: 5 },
-      { activityName: 'BodyPump', activityDescription: 'Strength', activityPrice: 20, activityTypeAmount: 8 },
-      { activityName: 'Zumba', activityDescription: 'Dance cardio', activityPrice: 15, activityTypeAmount: 6 },
-    ])
   }, [purchase])
 
   const handleChange = (field: keyof PurchaseDto, value: any) => {
     setEdited({ ...edited, [field]: value })
-  }
-
-  const handleActivityChange = (index: number, field: keyof Activity, value: any) => {
-    const updated = [...edited.activities]
-    updated[index] = { ...updated[index], [field]: value }
-    setEdited({ ...edited, activities: updated })
-  }
-
-  const calculateTotal = () => {
-    const sum = edited.activities.reduce((acc, a) => acc + a.activityPrice * a.activityTypeAmount, 0)
-    return sum
   }
 
   return (
@@ -71,13 +47,6 @@ export default function EditPurchaseModal({ purchase, onClose, onSave }: Props) 
             placeholder="Телефон"
           />
           <select
-            value={edited.clientGender}
-            onChange={e => handleChange('clientGender', e.target.value)}
-            className="border p-2 rounded"
-          >
-            {allGenders.map(g => <option key={g}>{g}</option>)}
-          </select>
-          <select
             value={edited.paymentMethod}
             onChange={e => handleChange('paymentMethod', e.target.value)}
             className="border p-2 rounded"
@@ -91,56 +60,9 @@ export default function EditPurchaseModal({ purchase, onClose, onSave }: Props) 
           >
             {allSubscriptions.map(s => <option key={s}>{s}</option>)}
           </select>
-          <select
-            value={edited.subscriptionTerm}
-            onChange={e => handleChange('subscriptionTerm', e.target.value)}
-            className="border p-2 rounded"
-          >
-            {allTerms.map(s => <option key={s}>{s}</option>)}
-          </select>
-          <select
-            value={edited.subscriptionVisitTime}
-            onChange={e => handleChange('subscriptionVisitTime', e.target.value)}
-            className="border p-2 rounded"
-          >
-            {allTimes.map(s => <option key={s}>{s}</option>)}
-          </select>
 
           <div className="font-semibold text-gray-700 mt-1 col-span-full">
-            Загальна вартість: {calculateTotal()} грн
-          </div>
-        </div>
-
-        <div className="mt-6">
-          <h3 className="font-semibold text-gray-700 mb-2">Види активності</h3>
-          <div className="space-y-3">
-            {edited.activities.map((a, index) => (
-              <div key={index} className="border p-3 rounded bg-gray-50 grid grid-cols-1 md:grid-cols-3 gap-2">
-                <select
-                  value={a.activityName}
-                  onChange={e => handleActivityChange(index, 'activityName', e.target.value)}
-                  className="border p-2 rounded"
-                >
-                  {allActivities.map(opt => (
-                    <option key={opt.activityName}>{opt.activityName}</option>
-                  ))}
-                </select>
-                <input
-                  type="number"
-                  className="border p-2 rounded"
-                  value={a.activityTypeAmount}
-                  onChange={e => handleActivityChange(index, 'activityTypeAmount', +e.target.value)}
-                  placeholder="Кількість"
-                />
-                <input
-                  type="number"
-                  className="border p-2 rounded"
-                  value={a.activityPrice}
-                  onChange={e => handleActivityChange(index, 'activityPrice', +e.target.value)}
-                  placeholder="Ціна"
-                />
-              </div>
-            ))}
+            Загальна вартість: {allSubscriptions} грн
           </div>
         </div>
 

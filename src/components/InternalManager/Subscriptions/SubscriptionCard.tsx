@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import { SubscriptionDto } from '../../../constants/types'
 import { highlightMatch } from '../../../constants/highlightMatch'
 import EditPurchaseModal from '../Purchases/EditPurchaseModal'
+import AddPurchaseModal from './AddPurchase'
 
 type Props = {
   subscription: SubscriptionDto
@@ -12,6 +13,7 @@ type Props = {
 
 export default function SubscriptionCard({ subscription, searchTerm, expandedCardId, setExpandedCardId }: Props) {
   const [isEditing, setIsEditing] = useState(false)
+  const [isAddingPurchase, setIsAddingPurchase] = useState(false)
   const isExpanded = expandedCardId === subscription.subscriptionId
   const contentRef = useRef<HTMLDivElement>(null)
 
@@ -20,7 +22,6 @@ export default function SubscriptionCard({ subscription, searchTerm, expandedCar
   }
 
   const handleSave = (updated: SubscriptionDto) => {
-    console.log('Збережено підписку:', updated)
     setIsEditing(false)
   }
 
@@ -58,6 +59,8 @@ export default function SubscriptionCard({ subscription, searchTerm, expandedCar
       <p className="text-sm text-gray-700">
         Термін: {highlightMatch(subscription.subscriptionTerm, searchTerm)} | Час: {highlightMatch(subscription.subscriptionVisitTime, searchTerm)}
       </p>
+
+      
 
       {/* Види активності */}
       <div className="mt-2 text-sm">
@@ -103,7 +106,20 @@ export default function SubscriptionCard({ subscription, searchTerm, expandedCar
           </>
         )}
       </div>
+      <button
+        className="mt-2 bg-green-600 text-white px-4 py-1 rounded hover:bg-green-700"
+        onClick={() => setIsAddingPurchase(true)}
+      >
+        Придбати
+      </button>
 
+      {isAddingPurchase && (
+        <AddPurchaseModal
+          subscription={subscription}
+          onClose={() => setIsAddingPurchase(false)}
+          onSuccess={() => setIsAddingPurchase(false)}
+        />
+      )}
       {/* Модальне вікно редагування підписки */}
       {/* {isEditing && (
         <EditPurchaseModal

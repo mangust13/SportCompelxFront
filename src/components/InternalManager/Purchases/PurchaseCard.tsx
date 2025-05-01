@@ -2,15 +2,18 @@ import { useState, useRef, useEffect } from 'react'
 import { PurchaseDto } from '../../../constants/types'
 import { highlightMatch } from '../../../constants/highlightMatch'
 import EditPurchaseModal from './EditPurchaseModal'
+import axios from 'axios'
+import { toast } from 'react-toastify'
 
 type Props = {
   purchase: PurchaseDto
   searchTerm: string
   expandedCardId: number | null
   setExpandedCardId: (id: number | null) => void
+  onDelete: (purchaseId: number) => void
 }
 
-export default function PurchaseCard({purchase, searchTerm, expandedCardId, setExpandedCardId,}: Props) {
+export default function PurchaseCard({purchase, searchTerm, expandedCardId, setExpandedCardId, onDelete}: Props) {
   const [isEditing, setIsEditing] = useState(false)
   const isExpanded = expandedCardId === purchase.purchaseNumber
   const contentRef = useRef<HTMLDivElement>(null)
@@ -19,9 +22,20 @@ export default function PurchaseCard({purchase, searchTerm, expandedCardId, setE
     setExpandedCardId(isExpanded ? null : purchase.purchaseNumber)
   }
 
-  const handleSave = (updated: PurchaseDto) => {
-    console.log('Збережено:', updated)
+  const handleSave = () => {
     setIsEditing(false)
+  }
+
+  const handleDelete = async () => {
+    if (!confirm(`Ви точно хочете видалити покупку №${purchase.purchaseNumber}?`)) return
+  
+    try {
+      await axios.delete(`https://localhost:7270/api/Purchases/${purchase.purchaseId}`)
+      toast.success('Покупка успішно видалена!')
+      onDelete(purchase.purchaseId)
+    } catch (error) {
+      toast.error('Помилка при видаленні покупки.')
+    }
   }
 
   useEffect(() => {
@@ -50,6 +64,13 @@ export default function PurchaseCard({purchase, searchTerm, expandedCardId, setE
             onClick={() => setIsEditing(true)}
           >
             ✏️
+          </button>
+          <button
+            className="text-gray-400 hover:text-red-500"
+            title="Видалити"
+            onClick={handleDelete}
+          >
+            🗑️
           </button>
         </div>
       </div>

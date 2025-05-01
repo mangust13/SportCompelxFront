@@ -20,8 +20,12 @@ export default function PurchaseList() {
   const [selectedGender, setSelectedGender] = useState<string>('')
   const [minCost, setMinCost] = useState<number | null>(null)
   const [maxCost, setMaxCost] = useState<number | null>(null)
-  const [purchaseDate, setPurchaseDate] = useState<string>('') // або Date
+  const [purchaseDate, setPurchaseDate] = useState<string>('')
   const [trigger, setTrigger] = useState(0)
+
+  const handleDeletePurchase = (purchaseId: number) => {
+    setAllPurchases(prev => prev.filter(p => p.purchaseId !== purchaseId))
+  }
 
   useEffect(() => {
     axios.get('https://localhost:7270/api/Activities')
@@ -34,7 +38,7 @@ export default function PurchaseList() {
   
   useEffect(() => {
     axios
-      .get('https://localhost:7270/api/purchase/purchases-view', {
+      .get('https://localhost:7270/api/Purchases/purchases-view', {
         params: {
           search: searchTerm,
           sortBy,
@@ -136,7 +140,8 @@ export default function PurchaseList() {
             purchase={p} 
             searchTerm={searchTerm}
             expandedCardId={expandedCardId}
-            setExpandedCardId={setExpandedCardId}/>
+            setExpandedCardId={setExpandedCardId}
+            onDelete={handleDeletePurchase}/>
         ))}
       </div>
 

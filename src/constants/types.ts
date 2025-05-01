@@ -1,4 +1,5 @@
 export type PurchaseDto = {
+    purchaseId: number 
     purchaseNumber: number
     purchaseDate: string
     paymentMethod: string
