@@ -3,7 +3,10 @@ import axios from 'axios'
 import { SubscriptionDto } from '../../../constants/types'
 import SubscriptionCard from './SubscriptionCard'
 import SubscriptionHeader from './SubscriptionHeader'
-import AddSubscriptionModal from './AddSubscriptionModal'
+import AddSubscriptionModal from './AddSubscriptionActivity'
+
+
+
 
 export default function SubscriptionList() {
   const [subscriptions, setSubscriptions] = useState<SubscriptionDto[]>([])
@@ -12,10 +15,17 @@ export default function SubscriptionList() {
   const [expandedCardId, setExpandedCardId] = useState<number | null>(null)
   const [isAddingNew, setIsAddingNew] = useState(false)
 
+  const fetchSubscriptions = async () => {
+    try {
+      const res = await axios.get<SubscriptionDto[]>('https://localhost:7270/api/Subscriptions/subscriptions-view')
+      setSubscriptions(res.data)
+    } catch (err) {
+      console.error('Помилка завантаження абонементів:', err)
+    }
+  }
+
   useEffect(() => {
-    axios.get('https://localhost:7270/api/Subscriptions/subscriptions-view')
-      .then(res => setSubscriptions(res.data))
-      .catch(err => console.error('Помилка завантаження абнемента:', err))
+    fetchSubscriptions()
   }, [])
 
   return (
@@ -42,7 +52,11 @@ export default function SubscriptionList() {
       </div>
       {isAddingNew && (
   <AddSubscriptionModal
-    onClose={() => setIsAddingNew(false)}/>
+    onClose={() => setIsAddingNew(false)}
+    onSuccess={() => {
+      fetchSubscriptions()
+      setIsAddingNew(false)
+    }}/>
 )}
     </div>        
   )

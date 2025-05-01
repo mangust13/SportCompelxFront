@@ -6,6 +6,9 @@ import Login from "./components/Login";
 import Register from "./components/Register";
 import Layout from "./layout/Layout";
 
+import { ToastContainer } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
+
 export default function App() {
   const { user, login } = useAuth();
   const initialized = useRef(false);
@@ -36,14 +39,14 @@ export default function App() {
     );
   }
 
-  const userRolePath = user.role.toLowerCase(); // напр. "trainer", "internalmanager", "purchasemanager"
+  const userRolePath = user.role.toLowerCase();
 
   return (
-    <Routes>
+    <>
+      <Routes>
       <Route path="/login" element={<Navigate to={`/${userRolePath}`} replace />} />
       <Route path="/register" element={<Navigate to={`/${userRolePath}`} replace />} />
 
-      {/* доступні роуті для кожного */}
       <Route
         path="/trainer"
         element={user.role === "Trainer" ? <Layout /> : <Navigate to={`/${userRolePath}`} />}
@@ -57,8 +60,10 @@ export default function App() {
         element={user.role === "PurchaseManager" ? <Layout /> : <Navigate to={`/${userRolePath}`} />}
       />
 
-      {/* fallback: якщо щось інше — редірект на свою роль */}
       <Route path="*" element={<Navigate to={`/${userRolePath}`} />} />
     </Routes>
+    <ToastContainer position="top-right" autoClose={3000} />
+    </>
+    
   );
 }

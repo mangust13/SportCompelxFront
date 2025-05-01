@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { SubscriptionDto } from '../../../constants/types'
 import axios from 'axios'
+import { toast } from 'react-toastify'
 
 type ActivityDto = {
   activityId: number
@@ -20,9 +21,10 @@ const VISIT_TIMES = ['Ранковий', 'Вечірній', 'Безлімітн
 
 type Props = {
   onClose: () => void
+  onSuccess: () => void
 }
 
-export default function AddSubscriptionModal({ onClose }: Props) {
+export default function AddSubscriptionModal({ onClose, onSuccess }: Props) {
   const [term, setTerm] = useState(TERMS[0].value)
   const [visitTime, setVisitTime] = useState(VISIT_TIMES[0])
   const [activities, setActivities] = useState<ActivityDto[]>([])
@@ -34,6 +36,8 @@ export default function AddSubscriptionModal({ onClose }: Props) {
 
   const [editingActivityId, setEditingActivityId] = useState<number | null>(null)
   const [editingFields, setEditingFields] = useState<{ name: string, price: number, desc: string }>({ name: '', price: 0, desc: '' })
+
+  const [isAddOpen, setIsAddOpen] = useState(false)
 
   useEffect(() => {
     axios.get<ActivityDto[]>('https://localhost:7270/api/Activities')
@@ -89,9 +93,9 @@ export default function AddSubscriptionModal({ onClose }: Props) {
       setNewActivityPrice(0)
       setNewActivityDescription('')
 
-      alert('Активність успішно додана!')
+      toast.success('Активність успішно додана!')
     } catch (error) {
-      alert('Помилка при додаванні активності.')
+      toast.error('Помилка при додаванні активності.')
     }
   }
 
@@ -122,9 +126,9 @@ export default function AddSubscriptionModal({ onClose }: Props) {
 
       setEditingActivityId(null)
       setEditingFields({ name: '', price: 0, desc: '' })
-      alert('Активність оновлена!')
+      toast.success('Активність оновлена!')
     } catch (err) {
-      alert('Помилка оновлення активності.')
+      toast.error('Помилка оновлення активності.')
     }
   }
 
@@ -134,9 +138,9 @@ export default function AddSubscriptionModal({ onClose }: Props) {
       await axios.delete(`https://localhost:7270/api/Activities/${id}`)
       setActivities(prev => prev.filter(a => a.activityId !== id))
       setSelectedActivities(prev => prev.filter(a => a.activity.activityId !== id))
-      alert('Активність видалена!')
+      toast.success('Активність видалена!')
     } catch (err) {
-      alert('Помилка видалення активності.')
+      toast.error('Помилка видалення активності.')
     }
   }
 
@@ -162,10 +166,10 @@ export default function AddSubscriptionModal({ onClose }: Props) {
 
     try {
       await axios.post('https://localhost:7270/api/Subscriptions', newSub)
-      alert('Абонемент успішно створено!')
-      onClose()
+      toast.success('Абонемент успішно створено!')
+      onSuccess()
     } catch (error) {
-      alert('Помилка при створенні абонемента.')
+      toast.error('Помилка при створенні абонемента.')
     }
   }
 
@@ -203,104 +207,160 @@ export default function AddSubscriptionModal({ onClose }: Props) {
         </div>
 
         {/* Види активностей */}
-        <div className="flex flex-col gap-2">
-          <p className="text-sm font-medium">Види активностей</p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            {activities.map(a => {
-              const selected = selectedActivities.find(s => s.activity.activityId === a.activityId)
-              const { min, max } = getLimits()
-              const isInvalid = selected && (selected.count < min || selected.count > max)
+<div className="flex flex-col gap-2">
+  <p className="text-sm font-medium">Види активностей</p>
 
-              return (
-                <div
-                  key={a.activityId}
-                  className={`border rounded p-3 text-sm space-y-1 transition cursor-pointer ${
-                    selected ? 'bg-primary/75 text-white' : 'bg-gray-100 hover:bg-gray-200'
-                  }`}
-                  onClick={() => handleActivityToggle(a)}
-                >
-                  <div className="flex justify-between items-start">
-                    {editingActivityId === a.activityId ? (
-                      <div className="flex flex-col gap-1 w-full" onClick={(e) => e.stopPropagation()}>
-                        <input
-                          className="border px-2 py-1 text-sm text-black"
-                          value={editingFields.name}
-                          onChange={(e) => setEditingFields({ ...editingFields, name: e.target.value })}
-                        />
-                        <input
-                          type="number"
-                          className="border px-2 py-1 text-sm text-black"
-                          value={editingFields.price}
-                          onChange={(e) => setEditingFields({ ...editingFields, price: Number(e.target.value) })}
-                        />
-                        <textarea
-                          className="border px-2 py-1 text-sm text-black resize-none"
-                          value={editingFields.desc}
-                          onChange={(e) => setEditingFields({ ...editingFields, desc: e.target.value })}
-                        />
-                        <div className="flex gap-2">
-                          <button onClick={handleUpdateActivity} className="text-xs text-green-600 hover:underline">Зберегти</button>
-                          <button onClick={() => setEditingActivityId(null)} className="text-xs text-gray-500 hover:underline">Скасувати</button>
-                        </div>
-                      </div>
-                    ) : (
-                      <>
-                        <p className="font-semibold">{a.activityName}</p>
-                        <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
-                          <button onClick={() => startEditActivity(a)}>
-                            ✏️
-                          </button>
-                          <button onClick={() => handleDeleteActivity(a.activityId)}>
-                            🗑️
-                          </button>
-                        </div>
-                      </>
-                    )}
-                  </div>
+  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+    {activities.map(a => {
+      const selected = selectedActivities.find(s => s.activity.activityId === a.activityId)
+      const { min, max } = getLimits()
+      const isInvalid = selected && (selected.count < min || selected.count > max)
 
-                  {selected && !editingActivityId && (
-                    <div className="space-y-1 mt-1" onClick={(e) => e.stopPropagation()}>
-                      <div className="flex flex-col gap-1">
-                        <div className="flex items-center gap-1">
-                          <span className="text-xs">Кількість занять:</span>
-                          <input
-                            type="number"
-                            min={1}
-                            value={selected.count === 0 ? '' : selected.count}
-                            onChange={(e) => {
-                              const val = e.target.value
-                              const number = val === '' ? 0 : Number(val)
-                              handleActivityChange(a.activityId, 'count', number)
-                            }}
-                            className="w-20 px-1 py-0.5 rounded border text-black text-sm"
-                          />
-                        </div>
-                        {isInvalid && (
-                          <p className="text-sm font-semibold text-red-600">
-                            Кількість має бути між {min} і {max}
-                          </p>
-                        )}
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <span className="text-xs">Ціна:</span>
-                        <input
-                          type="number"
-                          min={0}
-                          value={selected.activity.activityPrice}
-                          onChange={(e) =>
-                            handleActivityChange(a.activityId, 'price', Number(e.target.value))
-                          }
-                          className="w-20 px-1 py-0.5 rounded border text-black text-xs"
-                        />
-                        <span className="text-xs">грн</span>
-                      </div>
-                    </div>
-                  )}
+      return (
+        <div
+          key={a.activityId}
+          className={`border rounded p-3 text-sm space-y-1 transition cursor-pointer ${
+            selected ? 'bg-primary/75 text-white' : 'bg-gray-100 hover:bg-gray-200'
+          }`}
+          onClick={() => handleActivityToggle(a)}
+        >
+          <div className="flex justify-between items-start">
+            {editingActivityId === a.activityId ? (
+              <div className="flex flex-col gap-1 w-full" onClick={(e) => e.stopPropagation()}>
+                <input
+                  className="border px-2 py-1 text-sm text-black"
+                  value={editingFields.name}
+                  onChange={(e) => setEditingFields({ ...editingFields, name: e.target.value })}
+                />
+                <input
+                  type="number"
+                  className="border px-2 py-1 text-sm text-black"
+                  value={editingFields.price}
+                  onChange={(e) => setEditingFields({ ...editingFields, price: Number(e.target.value) })}
+                />
+                <textarea
+                  className="border px-2 py-1 text-sm text-black resize-none"
+                  value={editingFields.desc}
+                  onChange={(e) => setEditingFields({ ...editingFields, desc: e.target.value })}
+                />
+                <div className="flex gap-2">
+                  <button onClick={handleUpdateActivity} className="text-xs text-green-600 hover:underline">Зберегти</button>
+                  <button onClick={() => setEditingActivityId(null)} className="text-xs text-gray-500 hover:underline">Скасувати</button>
                 </div>
-              )
-            })}
+              </div>
+            ) : (
+              <>
+                <p className="font-semibold">{a.activityName}</p>
+                <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
+                  <button onClick={() => startEditActivity(a)}>✏️</button>
+                  <button onClick={() => handleDeleteActivity(a.activityId)}>🗑️</button>
+                </div>
+              </>
+            )}
           </div>
+
+          {selected && !editingActivityId && (
+            <div className="space-y-1 mt-1" onClick={(e) => e.stopPropagation()}>
+              <div className="flex flex-col gap-1">
+                <div className="flex items-center gap-1">
+                  <span className="text-xs">Кількість занять:</span>
+                  <input
+                    type="number"
+                    min={1}
+                    value={selected.count === 0 ? '' : selected.count}
+                    onChange={(e) => {
+                      const val = e.target.value
+                      const number = val === '' ? 0 : Number(val)
+                      handleActivityChange(a.activityId, 'count', number)
+                    }}
+                    className="w-20 px-1 py-0.5 rounded border text-black text-sm"
+                  />
+                </div>
+                {isInvalid && (
+                  <p className="text-sm font-semibold text-red-600">
+                    Кількість має бути між {min} і {max}
+                  </p>
+                )}
+              </div>
+              <div className="flex items-center gap-1">
+                <span className="text-xs">Ціна:</span>
+                <input
+                  type="number"
+                  min={0}
+                  value={selected.activity.activityPrice}
+                  onChange={(e) =>
+                    handleActivityChange(a.activityId, 'price', Number(e.target.value))
+                  }
+                  className="w-20 px-1 py-0.5 rounded border text-black text-xs"
+                />
+                <span className="text-xs">грн</span>
+              </div>
+            </div>
+          )}
         </div>
+      )
+    })}
+  </div>
+
+  {/* Розкривна форма додавання нової активності */}
+  <div className="mt-4 border-t pt-4">
+    {!isAddOpen ? (
+      <button
+        onClick={() => setIsAddOpen(true)}
+        className="text-sm text-primary font-medium"
+      >
+        ➕ Додати нову активність
+      </button>
+    ) : (
+      <div className="flex flex-col gap-2">
+        <div className="flex justify-between items-center">
+          <p className="text-sm font-bold text-primary">Нова активність</p>
+          <button
+            onClick={() => setIsAddOpen(false)}
+            className="text-sm text-gray-500 hover:underline"
+          >
+            Скасувати
+          </button>
+        </div>
+
+        <input
+          type="text"
+          placeholder="Назва активності"
+          value={newActivityName}
+          onChange={(e) => setNewActivityName(e.target.value)}
+          className="border rounded px-3 py-2 text-sm"
+        />
+
+        <input
+          type="number"
+          placeholder="Ціна за тренування (грн)"
+          value={newActivityPrice === 0 ? '' : newActivityPrice}
+          onChange={(e) => {
+            const val = e.target.value
+            setNewActivityPrice(val === '' ? 0 : Number(val))
+          }}
+          className="border rounded px-3 py-2 text-sm"
+        />
+
+        <textarea
+          placeholder="Опис активності (необов'язково)"
+          value={newActivityDescription}
+          onChange={(e) => setNewActivityDescription(e.target.value)}
+          className="border rounded px-3 py-2 text-sm resize-none"
+        />
+
+        <button
+          onClick={handleAddNewActivity}
+          disabled={!newActivityName.trim() || newActivityPrice <= 0}
+          className="mt-2 bg-primary text-white py-2 rounded hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          Додати активність
+        </button>
+      </div>
+    )}
+  </div>
+</div>
+
 
         {/* Вартість */}
         <div className="text-right text-sm font-medium mt-4">

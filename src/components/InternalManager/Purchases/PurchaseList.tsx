@@ -12,12 +12,39 @@ export default function PurchaseList() {
   const [isFilterOpen, setIsFilterOpen] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
   const [expandedCardId, setExpandedCardId] = useState<number | null>(null)
+  const [sortBy, setSortBy] = useState('purchaseDate')
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
+  const [activityFilters, setActivityFilters] = useState<string[]>([])
+  const [availableActivities, setAvailableActivities] = useState<string[]>([])
+  const [selectedPaymentMethods, setSelectedPaymentMethods] = useState<string[]>([])
+  const [selectedGender, setSelectedGender] = useState<string>('')
+  const [minCost, setMinCost] = useState<number | null>(null)
+  const [maxCost, setMaxCost] = useState<number | null>(null)
+  const [purchaseDate, setPurchaseDate] = useState<string>('') // або Date
+  const [trigger, setTrigger] = useState(0)
 
+  useEffect(() => {
+    axios.get('https://localhost:7270/api/Activities')
+      .then(res => {
+        const names = res.data.map((a: any) => a.activityName)
+        setAvailableActivities(names)
+      })
+      .catch(err => console.error('Помилка завантаження активностей:', err))
+  }, [])
+  
   useEffect(() => {
     axios
       .get('https://localhost:7270/api/purchase/purchases-view', {
         params: {
-          searchTerm
+          search: searchTerm,
+          sortBy,
+          order: sortOrder,
+          activities: activityFilters.join(','),
+          paymentMethods: selectedPaymentMethods.join(','),
+          clientGender: selectedGender,
+          minCost,
+          maxCost,
+          purchaseDate
         }
       })
       .then(res => {
@@ -25,7 +52,7 @@ export default function PurchaseList() {
         setCurrentPage(1)
       })
       .catch(err => console.error('Помилка завантаження:', err))
-  }, [searchTerm])
+  }, [trigger])
 
   const totalPages = Math.ceil(allPurchases.length / ITEMS_PER_PAGE)
 
@@ -75,7 +102,32 @@ export default function PurchaseList() {
         setIsFilterOpen={setIsFilterOpen}
         searchTerm={searchTerm}
         setSearchTerm={setSearchTerm}
+        sortBy={sortBy}
+        setSortBy={setSortBy}
+        sortOrder={sortOrder}
+        setSortOrder={setSortOrder}
+        activityFilters={activityFilters}
+        setActivityFilters={setActivityFilters}
+        availableActivities={availableActivities}
+
+        selectedPaymentMethods={selectedPaymentMethods}
+        setSelectedPaymentMethods={setSelectedPaymentMethods}
+
+        selectedGender={selectedGender}
+        setSelectedGender={setSelectedGender}
+
+        minCost={minCost}
+        setMinCost={setMinCost}
+
+        maxCost={maxCost}
+        setMaxCost={setMaxCost}
+
+        purchaseDate={purchaseDate}
+        setPurchaseDate={setPurchaseDate}
+
+        triggerSearch={() => setTrigger(prev => prev + 1)}
       />
+
 
       <div className={`grid gap-4 grid-cols-1 md:grid-cols-2 ${isFilterOpen ? 'xl:grid-cols-2' : 'xl:grid-cols-3'} items-start`}>
         {visiblePurchases.map(p => (

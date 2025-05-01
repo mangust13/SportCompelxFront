@@ -4,14 +4,46 @@ type Props = {
   setIsFilterOpen: (open: boolean) => void
   searchTerm: string
   setSearchTerm: (term: string) => void
+  sortBy: string
+  setSortBy: (value: string) => void
+  sortOrder: 'asc' | 'desc'
+  setSortOrder: (value: 'asc' | 'desc') => void
+
+  activityFilters: string[]
+  setActivityFilters: React.Dispatch<React.SetStateAction<string[]>>
+  availableActivities: string[]
+
+  selectedPaymentMethods: string[]
+  setSelectedPaymentMethods: React.Dispatch<React.SetStateAction<string[]>>
+
+  selectedGender: string
+  setSelectedGender: React.Dispatch<React.SetStateAction<string>>
+
+  minCost: number | null
+  setMinCost: React.Dispatch<React.SetStateAction<number | null>>
+
+  maxCost: number | null
+  setMaxCost: React.Dispatch<React.SetStateAction<number | null>>
+
+  purchaseDate: string
+  setPurchaseDate: React.Dispatch<React.SetStateAction<string>>
+
+  triggerSearch: () => void
 }
 
-export default function PurchaseHeader({ total, isFilterOpen, setIsFilterOpen, searchTerm, setSearchTerm }: Props) {
+
+export default function PurchaseHeader({
+  total, isFilterOpen, setIsFilterOpen, searchTerm, setSearchTerm,
+  sortBy, setSortBy, sortOrder, setSortOrder, activityFilters, setActivityFilters, availableActivities,
+  selectedPaymentMethods, setSelectedPaymentMethods, selectedGender, setSelectedGender,
+  minCost, setMinCost, maxCost, setMaxCost, purchaseDate, setPurchaseDate, triggerSearch
+}: Props & { triggerSearch: () => void }) {
   return (
     <div className="relative bg-white shadow-sm p-4 rounded-xl flex flex-col gap-4">
       <div className="flex flex-wrap justify-between items-center">
         <h2 className="text-lg font-bold text-primary">Всього покупок: {total}</h2>
 
+        {/* Search */}
         <div className="flex items-center gap-2">
           <input
             type="text"
@@ -21,18 +53,38 @@ export default function PurchaseHeader({ total, isFilterOpen, setIsFilterOpen, s
             className="border rounded px-3 py-1 text-sm"
           />
 
-          <select className="border rounded px-2 py-1 text-sm">
-            <option value="date_desc">Сортувати: Новіші</option>
-            <option value="date_asc">Сортувати: Старіші</option>
-            <option value="cost_desc">Дорожчі</option>
-            <option value="cost_asc">Дешевші</option>
+          {/* Sorting */}
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value)}
+            className="border rounded px-2 py-1 text-sm"
+          >
+            <option value="purchaseNumber">Номер покупки</option>
+            <option value="purchaseDate">Дата покупки</option>
+            <option value="subscriptionTotalCost">Ціна абонемента</option>
+            <option value="subscriptionName">Назва абонемента</option>
           </select>
 
           <button
-            onClick={() => setIsFilterOpen(!isFilterOpen)}
-            className="bg-primary text-white text-sm px-3 py-1 rounded hover:opacity-90"
+            onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+            className="px-2 py-1 rounded border bg-gray-100 hover:bg-gray-200"
+            title={`Сортування: ${sortOrder === 'asc' ? 'зростання' : 'спадання'}`}
           >
-            Фільтри
+            {sortOrder === 'asc' ? '⬆️' : '⬇️'}
+          </button>
+
+          {/* Filtration */}
+          <button
+            onClick={() => setIsFilterOpen(!isFilterOpen)}
+            className="px-3 py-1 rounded hover:opacity-90 flex items-center justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg"
+              fill="none" viewBox="0 0 24 24"
+              strokeWidth={1.5} stroke="currentColor"
+              className="w-5 h-5">
+              <path strokeLinecap="round" strokeLinejoin="round"
+                d="M12 3c2.755 0 5.455.232 8.083.678.533.09.917.556.917 1.096v1.044a2.25 2.25 0 0 1-.659 1.591l-5.432 5.432a2.25 2.25 0 0 0-.659 1.591v2.927a2.25 2.25 0 0 1-1.244 2.013L9.75 21v-6.568a2.25 2.25 0 0 0-.659-1.591L3.659 7.409A2.25 2.25 0 0 1 3 5.818V4.774c0-.54.384-1.006.917-1.096A48.32 48.32 0 0 1 12 3Z"
+              />
+            </svg>
           </button>
         </div>
       </div>
@@ -47,59 +99,99 @@ export default function PurchaseHeader({ total, isFilterOpen, setIsFilterOpen, s
           </div>
 
           <div className="flex flex-col gap-4 text-sm text-gray-700">
-            <div>
-              <p className="font-semibold mb-1">Метод оплати:</p>
-              <div className="space-y-1">
-                <label><input type="checkbox" /> Готівка</label><br />
-                <label><input type="checkbox" /> Картка</label><br />
-                <label><input type="checkbox" /> Онлайн</label>
-              </div>
+            {/* Payment methods */}
+            <div className="flex gap-4 flex-wrap">
+              {['Готівка', 'Карта'].map(method => (
+                <label key={method} className="flex items-center gap-1">
+                  <input
+                    type="checkbox"
+                    checked={selectedPaymentMethods.includes(method)}
+                    onChange={() =>
+                      setSelectedPaymentMethods(prev =>
+                        prev.includes(method)
+                          ? prev.filter(m => m !== method)
+                          : [...prev, method]
+                      )
+                    }
+                  />
+                  {method}
+                </label>
+              ))}
             </div>
 
+            {/* Cost */}
             <div>
               <p className="font-semibold mb-1">Вартість абонемента (грн):</p>
               <div className="flex gap-2">
-                <input type="number" placeholder="від" className="border rounded px-2 py-1 w-full" />
-                <input type="number" placeholder="до" className="border rounded px-2 py-1 w-full" />
+                <input
+                  type="number"
+                  placeholder="від"
+                  value={minCost ?? ''}
+                  onChange={(e) => setMinCost(e.target.value ? Number(e.target.value) : null)}
+                  className="border rounded px-2 py-1 w-full"
+                />
+                <input
+                  type="number"
+                  placeholder="до"
+                  value={maxCost ?? ''}
+                  onChange={(e) => setMaxCost(e.target.value ? Number(e.target.value) : null)}
+                  className="border rounded px-2 py-1 w-full"
+                />
               </div>
             </div>
 
+            {/* Date */}
             <div>
               <p className="font-semibold mb-1">Дата покупки:</p>
-              <input type="date" className="border rounded px-2 py-1 w-full" />
+              <input
+                type="date"
+                value={purchaseDate}
+                onChange={(e) => setPurchaseDate(e.target.value)}
+                className="border rounded px-2 py-1 w-full"
+              />
             </div>
 
+            {/* Gender */}
             <div>
               <p className="font-semibold mb-1">Стать клієнта:</p>
-              <select className="border rounded px-2 py-1 w-full">
+              <select
+                value={selectedGender}
+                onChange={(e) => setSelectedGender(e.target.value)}
+                className="border rounded px-2 py-1 w-full"
+              >
                 <option value="">Всі</option>
-                <option value="Male">Male</option>
-                <option value="Female">Female</option>
+                <option value="Чоловік">Чоловік</option>
+                <option value="Жінка">Жінка</option>
               </select>
             </div>
 
+            {/* Activities */}
             <div>
-              <p className="font-semibold mb-1">Термін абонемента:</p>
-              <select className="border rounded px-2 py-1 w-full">
-                <option value="">Всі</option>
-                <option value="1 month">1 місяць</option>
-                <option value="3 months">3 місяці</option>
-                <option value="6 months">6 місяців</option>
-                <option value="12 months">12 місяців</option>
-              </select>
+              <p className="font-semibold mb-1">Види активностей:</p>
+              <div className="flex flex-col gap-1 max-h-40 overflow-y-auto">
+                {availableActivities.map(name => (
+                  <label key={name} className="flex items-center gap-1">
+                    <input
+                      type="checkbox"
+                      checked={activityFilters.includes(name)}
+                      onChange={() =>
+                        setActivityFilters(prev =>
+                          prev.includes(name)
+                            ? prev.filter(a => a !== name)
+                            : [...prev, name]
+                        )
+                      }
+                    />
+                    {name}
+                  </label>
+                ))}
+              </div>
             </div>
 
-            <div>
-              <p className="font-semibold mb-1">Час відвідування:</p>
-              <select className="border rounded px-2 py-1 w-full">
-                <option value="">Всі</option>
-                <option value="Morning">Ранковий</option>
-                <option value="Вечірній">Вечірній</option>
-                <option value="Безлімітний">Безлімітний</option>
-              </select>
-            </div>
-
-            <button className="mt-4 bg-primary text-white w-full py-2 rounded hover:opacity-90">
+            <button
+              onClick={triggerSearch}
+              className="mt-4 bg-primary text-white w-full py-2 rounded hover:opacity-90"
+            >
               Застосувати фільтри
             </button>
           </div>
