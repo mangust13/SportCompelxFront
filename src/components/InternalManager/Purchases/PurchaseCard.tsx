@@ -28,7 +28,7 @@ export default function PurchaseCard({purchase, searchTerm, expandedCardId, setE
   }
 
   const handleDelete = async () => {
-    toast.info(
+    const toastId = toast.info(
       <div>
         Ви точно хочете видалити покупку №{purchase.purchaseNumber}?
         <div className="flex gap-2 mt-2">
@@ -38,8 +38,10 @@ export default function PurchaseCard({purchase, searchTerm, expandedCardId, setE
                 await axios.delete(`https://localhost:7270/api/Purchases/${purchase.purchaseId}`)
                 toast.success('Покупка успішно видалена!')
                 onDelete(purchase.purchaseId)
+                toast.dismiss(toastId)
               } catch (error) {
                 toast.error('Помилка при видаленні покупки.')
+                toast.dismiss(toastId)
               }
             }}
             className="bg-red-500 text-white px-2 py-1 rounded text-xs"
@@ -47,7 +49,7 @@ export default function PurchaseCard({purchase, searchTerm, expandedCardId, setE
             Так, видалити
           </button>
           <button
-            onClick={() => toast.dismiss()}
+            onClick={() => toast.dismiss(toastId)}
             className="bg-gray-300 px-2 py-1 rounded text-xs"
           >
             Скасувати
@@ -56,7 +58,7 @@ export default function PurchaseCard({purchase, searchTerm, expandedCardId, setE
       </div>,
       { autoClose: false }
     )
-  }
+  }  
 
   useEffect(() => {
     const content = contentRef.current

@@ -17,7 +17,7 @@ const TERMS = [
   { label: '1 рік', value: '1 рік', multiplier: 12 },
 ]
 
-const VISIT_TIMES = ['Ранковий', 'Вечірній', 'Безлімітний']
+const VISIT_TIMES = ['Ранковий', 'Вечірний', 'Безлімітний']
 
 type Props = {
   onClose: () => void
@@ -133,16 +133,39 @@ export default function AddSubscriptionModal({ onClose, onSuccess }: Props) {
   }
 
   const handleDeleteActivity = async (id: number) => {
-    if (!confirm('Ви точно хочете видалити активність?')) return
-    try {
-      await axios.delete(`https://localhost:7270/api/Activities/${id}`)
-      setActivities(prev => prev.filter(a => a.activityId !== id))
-      setSelectedActivities(prev => prev.filter(a => a.activity.activityId !== id))
-      toast.success('Активність видалена!')
-    } catch (err) {
-      toast.error('Помилка видалення активності.')
-    }
+    const toastId = toast.info(
+      <div>
+        Ви точно хочете видалити активність?
+        <div className="flex gap-2 mt-2">
+          <button
+            onClick={async () => {
+              try {
+                await axios.delete(`https://localhost:7270/api/Activities/${id}`)
+                setActivities(prev => prev.filter(a => a.activityId !== id))
+                setSelectedActivities(prev => prev.filter(a => a.activity.activityId !== id))
+                toast.success('Активність видалена!')
+                toast.dismiss(toastId)
+              } catch {
+                toast.error('Помилка видалення активності.')
+                toast.dismiss(toastId)
+              }
+            }}
+            className="bg-red-500 text-white px-2 py-1 rounded text-xs"
+          >
+            Так, видалити
+          </button>
+          <button
+            onClick={() => toast.dismiss(toastId)}
+            className="bg-gray-300 px-2 py-1 rounded text-xs"
+          >
+            Скасувати
+          </button>
+        </div>
+      </div>,
+      { autoClose: false }
+    )
   }
+  
 
   const totalCost = selectedActivities.reduce(
     (sum, a) => sum + a.activity.activityPrice * a.count,

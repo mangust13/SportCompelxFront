@@ -26,7 +26,12 @@ export default function AddPurchaseModal({ subscription, onClose, onSuccess }: P
   const [newClientPhone, setNewClientPhone] = useState('')
   const [newClientGender, setNewClientGender] = useState('Чоловік')
 
-  const [paymentMethodId, setPaymentMethodId] = useState(1)     
+  const [isEditingClient, setIsEditingClient] = useState(false)
+  const [editClientName, setEditClientName] = useState('')
+  const [editClientPhone, setEditClientPhone] = useState('')
+  const [editClientGender, setEditClientGender] = useState('Чоловік')
+
+  const [paymentMethodId, setPaymentMethodId] = useState(1)
 
   useEffect(() => {
     axios.get('https://localhost:7270/api/Clients')
@@ -38,8 +43,6 @@ export default function AddPurchaseModal({ subscription, onClose, onSuccess }: P
     value: c.clientId,
     label: `${c.clientFullName} (${c.clientPhoneNumber} • ${c.clientGender})`
   }))
-  
-  
 
   const handleAddNewClient = async () => {
     try {
@@ -49,8 +52,15 @@ export default function AddPurchaseModal({ subscription, onClose, onSuccess }: P
         clientGender: newClientGender
       })
 
-      setClients(prev => [...prev, response.data])
-      setSelectedClientId(response.data.clientId)
+      const newClient = {
+        clientId: response.data.clientId,
+        clientFullName: response.data.clientFullName,
+        clientPhoneNumber: response.data.clientPhoneNumber,
+        clientGender: response.data.clientGender
+      }
+
+      setClients(prev => [...prev, newClient])
+      setSelectedClientId(newClient.clientId)
 
       setNewClientName('')
       setNewClientPhone('')
@@ -63,14 +73,48 @@ export default function AddPurchaseModal({ subscription, onClose, onSuccess }: P
     }
   }
 
+  const handleUpdateClient = async () => {
+    if (!selectedClientId) return
+
+    try {
+      await axios.put(`https://localhost:7270/api/Clients/${selectedClientId}`, {
+        clientFullName: editClientName.trim(),
+        clientPhoneNumber: editClientPhone.trim(),
+        clientGender: editClientGender
+      })
+
+      setClients(prev =>
+        prev.map(c =>
+          c.clientId === selectedClientId
+            ? { ...c, clientFullName: editClientName, clientPhoneNumber: editClientPhone, clientGender: editClientGender }
+            : c
+        )
+      )
+
+      toast.success('Клієнт оновлений!')
+      setIsEditingClient(false)
+    } catch (error) {
+      toast.error('Помилка при оновленні клієнта.')
+    }
+  }
+
+  const handleDeleteClient = async () => {
+    if (!selectedClientId) return
+    if (!confirm('Ви точно хочете видалити цього клієнта?')) return
+
+    try {
+      await axios.delete(`https://localhost:7270/api/Clients/${selectedClientId}`)
+      setClients(prev => prev.filter(c => c.clientId !== selectedClientId))
+      setSelectedClientId(null)
+      toast.success('Клієнт видалений!')
+    } catch (error) {
+      toast.error('Помилка при видаленні клієнта.')
+    }
+  }
+
   const handleSave = async () => {
     if (!selectedClientId) {
       toast.error('Оберіть клієнта для покупки.')
-      return
-    }
-
-    if (!paymentMethodId) {
-      toast.error('Оберіть метод оплати.')
       return
     }
 
@@ -79,8 +123,7 @@ export default function AddPurchaseModal({ subscription, onClose, onSuccess }: P
         clientId: selectedClientId,
         subscriptionId: subscription.subscriptionId,
         paymentMethodId: paymentMethodId
-      }
-    )
+      })
 
       toast.success('Покупка успішно оформлена!')
       onSuccess()
@@ -97,16 +140,85 @@ export default function AddPurchaseModal({ subscription, onClose, onSuccess }: P
 
         {/* Пошук клієнта */}
         <div>
-            <p className="font-semibold mb-1">Клієнт:</p>
-            <Select
-                options={clientOptions}
-                onChange={(selected) => setSelectedClientId(selected?.value || null)}
-                placeholder="Оберіть клієнта..."
-                isClearable
-            />
+          <p className="font-semibold mb-1">Клієнт:</p>
+          <Select
+            options={clientOptions}
+            onChange={(selected) => setSelectedClientId(selected?.value || null)}
+            placeholder="Оберіть клієнта..."
+            isClearable
+          />
+
+          {selectedClientId && (
+            <div className="flex gap-2 mt-2">
+              <button
+                onClick={() => {
+                  const client = clients.find(c => c.clientId === selectedClientId)
+                  if (client) {
+                    setEditClientName(client.clientFullName)
+                    setEditClientPhone(client.clientPhoneNumber)
+                    setEditClientGender(client.clientGender)
+                    setIsEditingClient(true)
+                  }
+                }}
+                className="text-sm text-blue-600"
+              >
+                ✏️ Редагувати
+              </button>
+              <button
+                onClick={handleDeleteClient}
+                className="text-sm text-red-600"
+              >
+                🗑️ Видалити
+              </button>
+            </div>
+          )}
         </div>
 
+        {isEditingClient && (
+          <div className="flex flex-col gap-2 mt-4 border-t pt-4">
+            <p className="text-sm font-bold text-primary">Редагування клієнта</p>
 
+            <input
+              type="text"
+              placeholder="Повне ім'я"
+              value={editClientName}
+              onChange={(e) => setEditClientName(e.target.value)}
+              className="border rounded px-3 py-2 text-sm"
+            />
+
+            <input
+              type="text"
+              placeholder="Номер телефону"
+              value={editClientPhone}
+              onChange={(e) => setEditClientPhone(e.target.value)}
+              className="border rounded px-3 py-2 text-sm"
+            />
+
+            <select
+              value={editClientGender}
+              onChange={(e) => setEditClientGender(e.target.value)}
+              className="border rounded px-3 py-2 text-sm"
+            >
+              <option value="Чоловік">Чоловік</option>
+              <option value="Жінка">Жінка</option>
+            </select>
+
+            <div className="flex gap-2">
+              <button
+                onClick={handleUpdateClient}
+                className="bg-primary text-white px-3 py-1 rounded text-sm"
+              >
+                Зберегти
+              </button>
+              <button
+                onClick={() => setIsEditingClient(false)}
+                className="text-sm text-gray-500 hover:underline"
+              >
+                Скасувати
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Метод оплати */}
         <div>

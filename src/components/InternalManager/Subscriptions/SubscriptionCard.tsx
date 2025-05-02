@@ -3,15 +3,19 @@ import { SubscriptionDto } from '../../../constants/types'
 import { highlightMatch } from '../../../constants/highlightMatch'
 import EditPurchaseModal from '../Purchases/EditPurchaseModal'
 import AddPurchaseModal from './AddPurchase'
+import axios from 'axios'
+import { toast } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
 
 type Props = {
   subscription: SubscriptionDto
   searchTerm: string
   expandedCardId: number | null
   setExpandedCardId: (id: number | null) => void
+  onDelete: (purchaseId: number) => void
 }
 
-export default function SubscriptionCard({ subscription, searchTerm, expandedCardId, setExpandedCardId }: Props) {
+export default function SubscriptionCard({ subscription, searchTerm, expandedCardId, setExpandedCardId, onDelete }: Props) {
   const [isEditing, setIsEditing] = useState(false)
   const [isAddingPurchase, setIsAddingPurchase] = useState(false)
   const isExpanded = expandedCardId === subscription.subscriptionId
@@ -24,6 +28,39 @@ export default function SubscriptionCard({ subscription, searchTerm, expandedCar
   const handleSave = (updated: SubscriptionDto) => {
     setIsEditing(false)
   }
+
+  const handleDelete = async () => {
+    const toastId = toast.info(
+      <div>
+        Ви точно хочете видалити абонемент {subscription.subscriptionName}?
+        <div className="flex gap-2 mt-2">
+          <button
+            onClick={async () => {
+              try {
+                await axios.delete(`https://localhost:7270/api/Subscriptions/${subscription.subscriptionId}`)
+                toast.success('Абонемент успішно видалений!')
+                onDelete(subscription.subscriptionId)
+                toast.dismiss(toastId)
+              } catch (error) {
+                toast.error('Помилка при видаленні абонемента.')
+                toast.dismiss(toastId)
+              }
+            }}
+            className="bg-red-500 text-white px-2 py-1 rounded text-xs"
+          >
+            Так, видалити
+          </button>
+          <button
+            onClick={() => toast.dismiss(toastId)}
+            className="bg-gray-300 px-2 py-1 rounded text-xs"
+          >
+            Скасувати
+          </button>
+        </div>
+      </div>,
+      { autoClose: false }
+    )
+  }  
 
   useEffect(() => {
     const content = contentRef.current
@@ -46,12 +83,19 @@ export default function SubscriptionCard({ subscription, searchTerm, expandedCar
           {highlightMatch(subscription.subscriptionName, searchTerm)}
         </h3>
         <button
-          className="text-gray-400 hover:text-primary"
+          className="text-gray-400 hover:text-primary ml-10"
           title="Редагувати"
           onClick={() => setIsEditing(true)}
         >
           ✏️
         </button>
+        <button
+            className="text-gray-400 hover:text-red-500 mr-1"
+            title="Видалити"
+            onClick={handleDelete}
+          >
+            🗑️
+          </button>
       </div>
 
       {/* Основна інформація про підписку */}

@@ -23,6 +23,15 @@ export default function PurchaseList() {
   const [purchaseDate, setPurchaseDate] = useState<string>('')
   const [trigger, setTrigger] = useState(0)
 
+  const filteredPurchases = allPurchases.filter(p =>
+    p.purchaseNumber.toString().toLowerCase().includes(searchTerm.toLowerCase()) ||
+    p.clientFullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    p.clientPhoneNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    p.subscriptionName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    p.subscriptionTotalCost.toString().includes(searchTerm)
+  )
+
+  
   const handleDeletePurchase = (purchaseId: number) => {
     setAllPurchases(prev => prev.filter(p => p.purchaseId !== purchaseId))
   }
@@ -221,7 +230,7 @@ export default function PurchaseList() {
 
 
       <div className={`grid gap-4 grid-cols-1 md:grid-cols-2 ${isFilterOpen ? 'xl:grid-cols-2' : 'xl:grid-cols-3'} items-start`}>
-        {visiblePurchases.map(p => (
+        {filteredPurchases.map(p => (
           <PurchaseCard 
             key={p.purchaseNumber} 
             purchase={p} 

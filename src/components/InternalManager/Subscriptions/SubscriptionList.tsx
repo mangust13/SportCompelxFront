@@ -21,9 +21,26 @@ export default function SubscriptionList() {
   const [activityFilters, setActivityFilters] = useState<string[]>([])
   const [availableActivities, setAvailableActivities] = useState<string[]>([])
 
-  const [selectedVisitTime, setSelectedVisitTime] = useState<string>('')  // 
-  const [selectedTerm, setSelectedTerm] = useState<string>('')  //
+  const [selectedVisitTime, setSelectedVisitTime] = useState<string>('')
+  const [selectedTerm, setSelectedTerm] = useState<string>('')
 
+  const handleDeleteSubscription = (subscriptionId: number) => {
+    setSubscriptions(prev => prev.filter(p => p.subscriptionId !== subscriptionId))
+  }
+
+  const filteredSubscriptions = subscriptions.filter(sub =>
+    sub.subscriptionName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    sub.subscriptionTotalCost.toString().includes(searchTerm) ||
+    sub.subscriptionTerm.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    sub.subscriptionVisitTime.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    sub.activities.some(a =>
+      a.activityName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      a.activityPrice.toString().includes(searchTerm) ||
+      a.activityTypeAmount.toString().includes(searchTerm)
+    )
+  )
+  
+  
   useEffect(() => {
     axios.get('https://localhost:7270/api/Activities')
       .then(res => {
@@ -135,7 +152,7 @@ export default function SubscriptionList() {
           >
             <option value="">Всі</option>
             <option value="Ранковий">Ранковий</option>
-            <option value="Вечірній">Вечірній</option>
+            <option value="Вечірний">Вечірний</option>
             <option value="Безлімітний">Безлімітний</option>
           </select>
         </div>
@@ -167,13 +184,14 @@ export default function SubscriptionList() {
       </Header>
 
       <div className={`grid gap-4 grid-cols-1 md:grid-cols-2 ${isFilterOpen ? 'xl:grid-cols-2' : 'xl:grid-cols-3'} items-start`}>
-        {subscriptions.map(sub => (
+        {filteredSubscriptions.map(sub => (
           <SubscriptionCard 
             key={sub.subscriptionId}
             subscription={sub}
             searchTerm={searchTerm}
             expandedCardId={expandedCardId}
             setExpandedCardId={setExpandedCardId}
+            onDelete={handleDeleteSubscription}
           />
         ))}
       </div>

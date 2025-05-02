@@ -3,8 +3,8 @@ import { useState } from "react";
 import {useAuth} from "../components/AuthContext"
 import PurchaseList from "../components/InternalManager/Purchases/PurchaseList";
 import SubscriptionList from "../components/InternalManager/Subscriptions/SubscriptionList";
+import TrainerList from "../components/InternalManager/Trainers/TrainerList";
 import AttendanceList from "../components/Trainer/AttendanceList";
-
 
 export default function Layout()
 {
@@ -38,6 +38,10 @@ export default function Layout()
 
           {currentTable === "Абонементи" && user.role === "InternalManager" && (
             <SubscriptionList />
+          )}
+
+          {currentTable === "Тренери" && user.role === "InternalManager" && (
+            <TrainerList />
           )}
 
           {currentTable === "Відвідування" && user.role === "Trainer" && (
