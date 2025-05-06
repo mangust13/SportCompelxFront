@@ -14,7 +14,7 @@ type Props = {
   onDelete: (purchaseId: number) => void
 }
 
-export default function PurchaseCard({purchase, searchTerm, expandedCardId, setExpandedCardId, onDelete}: Props) {
+export default function PurchaseCard({ purchase, searchTerm, expandedCardId, setExpandedCardId, onDelete }: Props) {
   const [isEditing, setIsEditing] = useState(false)
   const isExpanded = expandedCardId === purchase.purchaseNumber
   const contentRef = useRef<HTMLDivElement>(null)
@@ -58,7 +58,7 @@ export default function PurchaseCard({purchase, searchTerm, expandedCardId, setE
       </div>,
       { autoClose: false }
     )
-  }  
+  }
 
   useEffect(() => {
     const content = contentRef.current
@@ -73,27 +73,29 @@ export default function PurchaseCard({purchase, searchTerm, expandedCardId, setE
     }
   }, [isExpanded])
 
+  // === СТАТУС ===
+  const totalTrainings = purchase.activities.reduce((sum, a) => sum + a.activityTypeAmount, 0)
+  const trainingsUsed = purchase.totalAttendances || 0
+  const trainingsLeft = totalTrainings - trainingsUsed
+
+  const termMonths = parseInt(purchase.subscriptionTerm.replace(/\D/g, ''), 10) || 0
+  const expirationDate = new Date(purchase.purchaseDate)
+  expirationDate.setMonth(expirationDate.getMonth() + termMonths)
+  const isExpired = new Date() > expirationDate
+
+  const isActive = !isExpired && trainingsLeft > 0
+
   return (
-    <div className="bg-white shadow-md rounded-xl p-4 flex flex-col gap-2">
-      {/* Верхній блок: номер + дата + іконка */}
+    <div className={`shadow-md rounded-xl p-4 flex flex-col gap-2 border-2 ${isActive ? 'border-green-500' : 'border-red-500'}`}>
+      {/* Верхній блок */}
       <div className="flex justify-between items-start text-sm text-gray-500">
         <span>{highlightMatch(`Покупка №${purchase.purchaseNumber}`, searchTerm)}</span>
         <div className="flex items-center gap-2">
-          <span className="text-xs text-gray-400">{new Date(purchase.purchaseDate).toLocaleDateString()}</span>
-          <button
-            className="text-gray-400 hover:text-primary"
-            title="Редагувати"
-            onClick={() => setIsEditing(true)}
-          >
-            ✏️
-          </button>
-          <button
-            className="text-gray-400 hover:text-red-500"
-            title="Видалити"
-            onClick={handleDelete}
-          >
-            🗑️
-          </button>
+          <span className={`px-2 py-0.5 rounded text-white text-xs ${isActive ? 'bg-green-500' : 'bg-red-500'}`}>
+            {isActive ? 'Активний' : 'Неактивний'}
+          </span>
+          <button className="hover:text-yellow-500" title="Редагувати" onClick={() => setIsEditing(true)}>✏️</button>
+          <button className="hover:text-red-500" title="Видалити" onClick={handleDelete}>🗑️</button>
         </div>
       </div>
 
@@ -104,10 +106,18 @@ export default function PurchaseCard({purchase, searchTerm, expandedCardId, setE
         </h3>
         <p className="text-sm text-gray-700">Ціна: {highlightMatch(purchase.subscriptionTotalCost, searchTerm)} грн</p>
         <p className="text-sm text-gray-700">Оплата: {highlightMatch(purchase.paymentMethod, searchTerm)}</p>
-
         <p className="text-sm text-gray-700">
           Термін: {highlightMatch(purchase.subscriptionTerm, searchTerm)} | Час:{' '}
           {highlightMatch(purchase.subscriptionVisitTime, searchTerm)}
+        </p>
+        <p className="text-sm text-gray-700">
+          Використано тренувань: <span className="font-semibold">{trainingsUsed} / {totalTrainings}</span>
+        </p>
+        <p className="text-sm text-gray-700">
+          Термін дії до:{' '}
+          <span className={`px-2 py-0.5 rounded text-white text-xs ${isExpired ? 'bg-red-500' : 'bg-green-500'}`}>
+            {expirationDate.toLocaleDateString()}
+          </span>
         </p>
       </div>
 
@@ -132,10 +142,7 @@ export default function PurchaseCard({purchase, searchTerm, expandedCardId, setE
                 </span>
               ))}
             </p>
-            <button
-              className="text-blue-500 hover:underline text-sm mt-1"
-              onClick={handleExpandToggle}
-            >
+            <button className="text-blue-500 hover:underline text-sm mt-1" onClick={handleExpandToggle}>
               Показати більше
             </button>
           </>
@@ -153,10 +160,7 @@ export default function PurchaseCard({purchase, searchTerm, expandedCardId, setE
                 ))}
               </ul>
             </div>
-            <button
-              className="text-blue-500 hover:underline text-sm mt-2"
-              onClick={handleExpandToggle}
-            >
+            <button className="text-blue-500 hover:underline text-sm mt-2" onClick={handleExpandToggle}>
               Згорнути
             </button>
           </>

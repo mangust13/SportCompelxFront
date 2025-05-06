@@ -5,7 +5,6 @@ import SubscriptionCard from './SubscriptionCard'
 import AddSubscriptionModal from './AddSubscriptionActivity'
 import Header from '../../../layout/Header'
 
-
 export default function SubscriptionList() {
   const [subscriptions, setSubscriptions] = useState<SubscriptionDto[]>([])
   const [isFilterOpen, setIsFilterOpen] = useState(false)
@@ -34,12 +33,9 @@ export default function SubscriptionList() {
     sub.subscriptionTerm.toLowerCase().includes(searchTerm.toLowerCase()) ||
     sub.subscriptionVisitTime.toLowerCase().includes(searchTerm.toLowerCase()) ||
     sub.activities.some(a =>
-      a.activityName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      a.activityPrice.toString().includes(searchTerm) ||
-      a.activityTypeAmount.toString().includes(searchTerm)
+      a.activityName.toLowerCase().includes(searchTerm.toLowerCase())
     )
   )
-  
   
   useEffect(() => {
     axios.get('https://localhost:7270/api/Activities')
@@ -55,7 +51,6 @@ export default function SubscriptionList() {
       const res = await axios.get<SubscriptionDto[]>('https://localhost:7270/api/Subscriptions/subscriptions-view',
         {
           params: {
-            search: searchTerm,
             sortBy,
             order: sortOrder,
             minCost,
@@ -196,13 +191,13 @@ export default function SubscriptionList() {
         ))}
       </div>
       {isAddingNew && (
-  <AddSubscriptionModal
-    onClose={() => setIsAddingNew(false)}
-    onSuccess={() => {
-      fetchSubscriptions()
-      setIsAddingNew(false)
-    }}/>
-)}
+        <AddSubscriptionModal
+          onClose={() => setIsAddingNew(false)}
+          onSuccess={() => {
+            fetchSubscriptions()
+            setIsAddingNew(false)
+          }}/>
+      )}
     </div>        
   )
 }

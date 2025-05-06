@@ -1,19 +1,20 @@
 type FilterHeaderProps = {
-    title: string
-    total: number
-    isFilterOpen: boolean
-    setIsFilterOpen: (open: boolean) => void
-    searchTerm: string
-    setSearchTerm: (term: string) => void
-    sortBy: string
-    setSortBy: (value: string) => void
-    sortOrder: 'asc' | 'desc'
-    setSortOrder: (value: 'asc' | 'desc') => void
-    sortOptions: { value: string, label: string }[]
-    triggerSearch: () => void
-    onAddNew?: () => void  // <-- новий проп
-    children?: React.ReactNode
-  }
+  title: string
+  total: number
+  searchTerm: string
+  setSearchTerm: (term: string) => void
+  onAddNew?: () => void
+  isFilterOpen?: boolean
+  setIsFilterOpen?: (open: boolean) => void
+  sortBy?: string
+  setSortBy?: (value: string) => void
+  sortOrder?: 'asc' | 'desc'
+  setSortOrder?: (value: 'asc' | 'desc') => void
+  sortOptions?: { value: string, label: string }[]
+  triggerSearch?: () => void
+  children?: React.ReactNode
+}
+
   
   export default function FilterHeader({
     title, total, isFilterOpen, setIsFilterOpen, searchTerm, setSearchTerm,
@@ -44,6 +45,7 @@ type FilterHeaderProps = {
               className="border rounded px-3 py-1 text-sm"
             />
   
+            {sortOptions && sortBy && setSortBy && triggerSearch && (
             <select
               value={sortBy}
               onChange={(e) => {
@@ -56,18 +58,22 @@ type FilterHeaderProps = {
                 <option key={opt.value} value={opt.value}>{opt.label}</option>
               ))}
             </select>
+          )}
   
-            <button
-              onClick={() => {
-                setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')
-                triggerSearch()
-              }}
-              className="px-2 py-1 rounded border bg-gray-100 hover:bg-gray-200"
-              title={`Сортування: ${sortOrder === 'asc' ? 'зростання' : 'спадання'}`}
-            >
-              {sortOrder === 'asc' ? '⬆️' : '⬇️'}
-            </button>
+          {sortOrder && setSortOrder && triggerSearch && (
+          <button
+            onClick={() => {
+              setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')
+              triggerSearch()
+            }}
+            className="px-2 py-1 rounded border bg-gray-100 hover:bg-gray-200"
+            title={`Сортування: ${sortOrder === 'asc' ? 'зростання' : 'спадання'}`}
+          >
+            {sortOrder === 'asc' ? '⬆️' : '⬇️'}
+          </button>
+        )}
   
+        {isFilterOpen !== undefined && setIsFilterOpen && (
             <button
               onClick={() => setIsFilterOpen(!isFilterOpen)}
               className="px-3 py-1 rounded hover:opacity-90 flex items-center justify-center"
@@ -81,6 +87,7 @@ type FilterHeaderProps = {
                 />
               </svg>
             </button>
+        )}
           </div>
         </div>
   

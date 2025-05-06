@@ -1,6 +1,7 @@
 export type PurchaseDto = {
     purchaseId: number 
     purchaseNumber: number
+    totalAttendances: number
     purchaseDate: string
     paymentMethod: string
     clientFullName: string
@@ -43,3 +44,21 @@ export type PurchaseDto = {
       activityTypeAmount: number
     }[]
   }
+
+  export type TrainerScheduleEntryDto = {
+    scheduleId: number
+    dayName: string
+    activityName: string
+    startTime: string
+    endTime: string
+}
+
+ export type TrainerFullScheduleDto = {
+  trainerId: number
+  trainerFullName: string
+  trainerPhoneNumber: string
+  trainerGender: string
+  trainerAddress: string
+  trainerCity: string
+  schedule: TrainerScheduleEntryDto[]
+}

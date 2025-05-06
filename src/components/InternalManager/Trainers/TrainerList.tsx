@@ -1,85 +1,170 @@
 import { useEffect, useState } from 'react'
 import axios from 'axios'
-import { toast } from 'react-toastify'
-
-type TrainerDto = {
-  trainerId: number
-  trainerFullName: string
-  trainerEmail: string
-  trainerPhoneNumber: string
-  trainerPhotoUrl?: string // якщо є фото, або можна заглушку
-}
+import Header from '../../../layout/Header'
+import TrainerCard from './TrainerCard'
+import { TrainerFullScheduleDto } from '../../../constants/types'
+import AddTrainer from './AddTrainer'
 
 export default function TrainerList() {
-  const [trainers, setTrainers] = useState<TrainerDto[]>([])
-  const [search, setSearch] = useState('')
+  const [trainers, setTrainers] = useState<TrainerFullScheduleDto[]>([])
+  const [isFilterOpen, setIsFilterOpen] = useState(false)
+  const [searchTerm, setSearchTerm] = useState('')
 
-  useEffect(() => {
-    axios.get('https://localhost:7270/api/Trainers')
-      .then(res => setTrainers(res.data))
-      .catch(err => console.error('Помилка завантаження тренерів:', err))
-  }, [])
+  const [selectedGender, setSelectedGender] = useState<string | null>(null)
+  const [selectedCity, setSelectedCity] = useState<string | null>(null)
+  const [selectedAddress, setSelectedAddress] = useState<string | null>(null)
 
-  const handleDelete = async (id: number) => {
-    if (!confirm('Ви точно хочете видалити цього тренера?')) return
+  const [availableCities, setAvailableCities] = useState<string[]>([])
+  const [availableAddresses, setAvailableAddresses] = useState<string[]>([])
+
+  const [trigger, setTrigger] = useState(0)
+  const [isAddingTrainer, setIsAddingTrainer] = useState(false)
+
+  const handleAddTrainerSuccess = () => {
+    fetchTrainers()
+    setIsAddingTrainer(false)
+  }
+
+
+  const fetchTrainers = async () => {
     try {
-      await axios.delete(`https://localhost:7270/api/Trainers/${id}`)
-      setTrainers(prev => prev.filter(t => t.trainerId !== id))
-      toast.success('Тренера видалено!')
+      const res = await axios.get<TrainerFullScheduleDto[]>('https://localhost:7270/api/Trainers/full-schedules', {
+        params: {
+          gender: selectedGender || null,
+          cities: selectedCity ? selectedCity : null,
+          addresses: selectedAddress ? selectedAddress : null
+        }
+      })
+      setTrainers(res.data)
+
+      const uniqueCities = [...new Set(res.data.map(t => t.trainerCity))]
+      setAvailableCities(uniqueCities)
+
+      if (selectedCity) {
+        const filteredAddresses = [...new Set(res.data.filter(t => t.trainerCity === selectedCity).map(t => t.trainerAddress))]
+        setAvailableAddresses(filteredAddresses)
+      } else {
+        const allAddresses = [...new Set(res.data.map(t => t.trainerAddress))]
+        setAvailableAddresses(allAddresses)
+      }
     } catch (err) {
-      toast.error('Помилка при видаленні тренера.')
+      console.error('Помилка завантаження тренерів:', err)
     }
   }
 
-  const filtered = trainers.filter(t =>
-    t.trainerFullName.toLowerCase().includes(search.toLowerCase())
-  )
+  useEffect(() => {
+    fetchTrainers()
+  }, [trigger])
 
   return (
-    
-    <div>
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-bold text-primary">Тренери</h2>
-        <input
-          type="text"
-          placeholder="Пошук..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="border rounded px-3 py-1 text-sm"
-        />
-      </div>
+    <div className={`flex flex-col gap-6 ${isFilterOpen ? 'w-[75%]' : 'w-[100%]'}`}>
+      <Header
+        title="Тренери"
+        total={trainers.length}
+        isFilterOpen={isFilterOpen}
+        setIsFilterOpen={setIsFilterOpen}
+        searchTerm={searchTerm}
+        setSearchTerm={setSearchTerm}
+        onAddNew={() => setIsAddingTrainer(true)}>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-        {filtered.map(trainer => (
-          <div key={trainer.trainerId} className="bg-white shadow rounded p-4 flex flex-col items-center relative">
-            <img
-              src={trainer.trainerPhotoUrl || 'https://via.placeholder.com/100'}
-              alt={trainer.trainerFullName}
-              className="w-20 h-20 rounded-full object-cover mb-2"
-            />
-            <h3 className="font-bold">{trainer.trainerFullName}</h3>
-            <p className="text-sm text-gray-600">📧 {trainer.trainerEmail}</p>
-            <p className="text-sm text-gray-600">📞 {trainer.trainerPhoneNumber}</p>
-
-            <div className="absolute top-2 right-2 flex gap-1">
-              <button
-                title="Редагувати"
-                className="text-yellow-500 hover:text-yellow-600"
-                onClick={() => toast.info('Редагування тренера')}
-              >
-                ✏️
-              </button>
-              <button
-                title="Видалити"
-                className="text-red-500 hover:text-red-600"
-                onClick={() => handleDelete(trainer.trainerId)}
-              >
-                ❌
-              </button>
-            </div>
+        {/* Filters */}
+        <div className="flex flex-col gap-4 text-sm text-gray-700">
+          {/* Gender */}
+          <div>
+            <p className="font-semibold mb-1">Стать тренера:</p>
+            <select
+              value={selectedGender || ''}
+              onChange={(e) => setSelectedGender(e.target.value || null)}
+              className="border rounded px-2 py-1 w-full"
+            >
+              <option value="">Всі</option>
+              <option value="Чоловік">Чоловік</option>
+              <option value="Жінка">Жінка</option>
+            </select>
           </div>
-        ))}
+
+          {/* City */}
+          <div>
+            <p className="font-semibold mb-1">Місто:</p>
+            <select
+              value={selectedCity || ''}
+              onChange={(e) => {
+                const val = e.target.value || null
+                setSelectedCity(val)
+                setSelectedAddress(null) // скидаємо обрану адресу
+                if (val) {
+                  const filteredAddresses = [...new Set(trainers.filter(t => t.trainerCity === val).map(t => t.trainerAddress))]
+                  setAvailableAddresses(filteredAddresses)
+                } else {
+                  const allAddresses = [...new Set(trainers.map(t => t.trainerAddress))]
+                  setAvailableAddresses(allAddresses)
+                }
+              }}
+              className="border rounded px-2 py-1 w-full"
+            >
+              <option value="">Всі</option>
+              {availableCities.map(city => (
+                <option key={city} value={city}>{city}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* Address */}
+          <div>
+            <p className="font-semibold mb-1">Адреса спорткомплексу:</p>
+            <select
+              value={selectedAddress || ''}
+              onChange={(e) => setSelectedAddress(e.target.value || null)}
+              className="border rounded px-2 py-1 w-full"
+            >
+              <option value="">Всі</option>
+              {availableAddresses.map(address => (
+                <option key={address} value={address}>{address}</option>
+              ))}
+            </select>
+          </div>
+
+          <button
+            onClick={() => setTrigger(prev => prev + 1)}
+            className="mt-4 bg-primary text-white w-full py-2 rounded hover:opacity-90"
+          >
+            Застосувати фільтри
+          </button>
+        </div>
+      </Header>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
+        {trainers
+          .filter(t =>
+            t.trainerFullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            t.trainerPhoneNumber.includes(searchTerm) ||
+            t.trainerGender.toLowerCase().includes(searchTerm) ||
+            t.trainerAddress.toLowerCase().includes(searchTerm) ||
+            t.trainerCity.toLowerCase().includes(searchTerm)
+          )
+          .map(trainer => (
+            <TrainerCard 
+              key={trainer.trainerId} 
+              trainer={trainer} 
+              search={searchTerm} 
+              onDelete={(id) => setTrainers(prev => prev.filter(t => t.trainerId !== id))}
+              onUpdate={(updatedTrainer) =>
+                setTrainers(prev => prev.map(t => t.trainerId === updatedTrainer.trainerId ? updatedTrainer : t))
+              }
+              />
+          ))}
       </div>
+
+      {isAddingTrainer && (
+        <AddTrainer
+          onClose={() => setIsAddingTrainer(false)}
+          onSuccess={() => {
+            fetchTrainers()
+            setIsAddingTrainer(false)
+          }}
+        />
+      )}
+
     </div>
   )
 }
