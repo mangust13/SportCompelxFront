@@ -19,18 +19,6 @@ export type PurchaseDto = {
     }[]
   }
   
-  export type AttendanceRecordDto = {
-    purchaseNumber: number
-    purchaseDate: string
-    subscriptionName: string
-    subscriptionTerm: string
-    subscriptionVisitTime: string
-    activityName: string
-    trainerName: string
-    gymNumber: string
-    sportComplexAddress: string
-  }
-  
   export type SubscriptionDto = {
     subscriptionId: number
     subscriptionName: string
@@ -61,4 +49,59 @@ export type PurchaseDto = {
   trainerAddress: string
   trainerCity: string
   schedule: TrainerScheduleEntryDto[]
+}
+
+// Trainer
+export type AttendanceRecordDto = {
+  attendanceId: number
+  purchaseNumber: number
+  purchaseDate: string
+  clientFullName: string
+  subscriptionName: string
+  subscriptionTerm: string
+  subscriptionVisitTime: string
+  subscriptionActivities: ActivityDto[]
+  gymNumber: number
+  sportComplexAddress: string
+  sportComplexCity: string
+  attendanceDateTime: string
+  trainingStartTime: string
+  trainingEndTime: string
+  trainingActivity: string
+}
+
+export type ActivityDto = {
+  activityId: number
+  activityName: string
+}
+
+
+// PurchaseManager
+export type DeliveryDto = {
+  deliveryId: number
+  deliveryDate: string
+  deliveredQuantity: number
+  gymNumber: number
+}
+
+export type PurchasedProductDto = {
+  purchasedProductId: number
+  productName: string
+  quantity: number
+  unitPrice: number
+  productDescription: string
+  brandName: string
+  productType: string
+  deliveries: DeliveryDto[]
+}
+
+export type OrderDto = {
+  orderId: number
+  orderNumber: number
+  orderDate: string
+  orderTotalPrice: number
+  paymentMethod: string
+  orderStatus: string
+  supplierName: string
+  purchasedProducts: PurchasedProductDto[]
 }

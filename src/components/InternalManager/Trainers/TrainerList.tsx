@@ -75,8 +75,7 @@ export default function TrainerList() {
             <select
               value={selectedGender || ''}
               onChange={(e) => setSelectedGender(e.target.value || null)}
-              className="border rounded px-2 py-1 w-full"
-            >
+              className="border rounded px-2 py-1 w-full">
               <option value="">Всі</option>
               <option value="Чоловік">Чоловік</option>
               <option value="Жінка">Жінка</option>
@@ -91,7 +90,7 @@ export default function TrainerList() {
               onChange={(e) => {
                 const val = e.target.value || null
                 setSelectedCity(val)
-                setSelectedAddress(null) // скидаємо обрану адресу
+                setSelectedAddress(null)
                 if (val) {
                   const filteredAddresses = [...new Set(trainers.filter(t => t.trainerCity === val).map(t => t.trainerAddress))]
                   setAvailableAddresses(filteredAddresses)

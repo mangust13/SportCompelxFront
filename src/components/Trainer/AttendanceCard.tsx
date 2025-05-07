@@ -1,36 +1,56 @@
 import { AttendanceRecordDto } from '../../constants/types'
+import { highlightMatch } from '../../constants/highlightMatch'
 
 type Props = {
   attendance: AttendanceRecordDto
+  search: string
 }
 
-export default function AttendanceCard({ attendance }: Props) {
+export default function AttendanceCard({ attendance, search }: Props) {
   return (
-    <div className="bg-white shadow-md rounded-xl p-4 flex flex-col gap-2">
-      {/* Верхній блок */}
-      <div className="flex justify-between text-sm text-gray-500">
-        <span>Покупка №{attendance.purchaseNumber}</span>
-        <span>{new Date(attendance.purchaseDate).toLocaleDateString()}</span>
+    <div className="bg-white shadow-md rounded-xl p-3 flex flex-col gap-1 border border-gray-300">
+      <div className="flex justify-between items-start text-sm text-gray-500">
+        <span>{highlightMatch(`Покупка №${attendance.purchaseNumber}`, search)}</span>
       </div>
 
-      {/* Абонемента */}
-      <div className="mt-2">
-        <h3 className="font-bold text-lg text-primary">{attendance.subscriptionName}</h3>
+      <div>
+        <h3 className="font-bold text-lg text-primary">
+          {highlightMatch(attendance.subscriptionName, search)}
+        </h3>
         <p className="text-sm text-gray-700">
-          Термін: {attendance.subscriptionTerm} | Час: {attendance.subscriptionVisitTime}
+          Термін: {highlightMatch(attendance.subscriptionTerm, search)} | Час: {highlightMatch(attendance.subscriptionVisitTime, search)}
         </p>
       </div>
 
-      {/* Тренер та активність */}
-      <div className="mt-2 text-sm">
-        <p><span className="font-semibold">Тренер:</span> {attendance.trainerName}</p>
-        <p><span className="font-semibold">Активність:</span> {attendance.activityName}</p>
+      <div className="text-sm">
+        <p className="font-semibold">Активності абонемента:</p>
+        <p className="text-gray-700">
+          {attendance.subscriptionActivities.map((a, i) => (
+            <span key={i}>
+              {i > 0 && ', '}
+              {highlightMatch(a.activityName, search)}
+            </span>
+          ))}
+        </p>
       </div>
 
-      {/* Зал та спорткомплекс */}
-      <div className="mt-2 text-sm">
-        <p><span className="font-semibold">Зал:</span> {attendance.gymNumber}</p>
-        <p><span className="font-semibold">Спорткомплекс:</span> {attendance.sportComplexAddress}</p>
+      <div className="text-sm">
+        <p><span className="font-semibold">Клієнт:</span> {highlightMatch(attendance.clientFullName, search)}</p>
+      </div>
+
+      <div className="text-sm">
+        <p>
+          <span className="font-semibold">Локація:</span> Зал №{attendance.gymNumber}, {highlightMatch(attendance.sportComplexAddress, search)}, {highlightMatch(attendance.sportComplexCity, search)}
+        </p>
+      </div>
+
+      <div className="text-sm">
+        <p><span className="font-semibold">Час проведення тренування:</span> {attendance.trainingStartTime}, {attendance.trainingEndTime}</p>
+        <p><span className="font-semibold">Вид тренування:</span> {highlightMatch(attendance.trainingActivity, search)}</p>
+      </div>
+
+      <div className="text-sm">
+        <p><span className="font-semibold">Дата та час відвідування:</span> {new Date(attendance.attendanceDateTime).toLocaleString()}</p>
       </div>
     </div>
   )

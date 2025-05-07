@@ -1,7 +1,6 @@
 export const accessbyRole = {
     Trainer: [
-        "Відвідування",
-        "Зали",
+        "Відвідування"
       ],
     InternalManager: [
       "Покупки",
@@ -9,11 +8,9 @@ export const accessbyRole = {
       "Тренери"
     ],
     PurchaseManager: [
-        "Suppliers",
-        "Orders",
-        "PurchasedProducts",
-        "Deliveries",
-        "Products",
+        "Поставки",
+        "Постачальники",
+        "Типи продуктів",
       ]
   } as const
 

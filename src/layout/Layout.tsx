@@ -5,6 +5,8 @@ import PurchaseList from "../components/InternalManager/Purchases/PurchaseList";
 import SubscriptionList from "../components/InternalManager/Subscriptions/SubscriptionList";
 import TrainerList from "../components/InternalManager/Trainers/TrainerList";
 import AttendanceList from "../components/Trainer/AttendanceList";
+import OrderList from '../components/PurchaseManager/Orders/OrderList';
+import SupplierList from '../components/PurchaseManager/Suppliers/SupplierList';
 
 export default function Layout()
 {
@@ -12,6 +14,7 @@ export default function Layout()
     const [currentTable, setCurrentTable] = useState<string>(() => {
       if (user?.role === "InternalManager") return "Покупки";
       if (user?.role === "Trainer") return "Відвідування";
+      if (user?.role === "PurchaseManager") return "Поставки";
       return "";
     });
 
@@ -32,6 +35,7 @@ export default function Layout()
           <main className="flex-1 p-6 overflow-auto">
           {!currentTable && <div>Виберіть таблицю</div>}
 
+          {/* InternalManager */}
           {currentTable === "Покупки" && user.role === "InternalManager" && (
             <PurchaseList />
           )}
@@ -44,8 +48,18 @@ export default function Layout()
             <TrainerList />
           )}
 
+          {/* Trainer */}
           {currentTable === "Відвідування" && user.role === "Trainer" && (
             <AttendanceList />
+          )}
+
+          {/* PurchaseManager */}
+          {currentTable === "Поставки" && user.role === "PurchaseManager" && (
+            <OrderList />
+          )}
+
+          {currentTable === "Постачальники" && user.role === "PurchaseManager" && (
+            <SupplierList />
           )}
 
           </main>

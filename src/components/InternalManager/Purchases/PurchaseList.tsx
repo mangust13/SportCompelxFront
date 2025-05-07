@@ -3,8 +3,7 @@ import axios from 'axios'
 import { PurchaseDto } from '../../../constants/types'
 import PurchaseCard from './PurchaseCard'
 import Header from '../../../layout/Header'
-
-const ITEMS_PER_PAGE = 15
+import { ITEMS_PER_PAGE, renderPagination } from '../../../constants/pagination'
 
 export default function PurchaseList() {
   const [allPurchases, setAllPurchases] = useState<PurchaseDto[]>([])
@@ -38,7 +37,6 @@ export default function PurchaseList() {
     )
   )
 
-  
   const handleDeletePurchase = (purchaseId: number) => {
     setAllPurchases(prev => prev.filter(p => p.purchaseId !== purchaseId))
   }
@@ -51,21 +49,20 @@ export default function PurchaseList() {
       })
       .catch(err => console.error('Помилка завантаження активностей:', err))
   }, [])
-  
+
   useEffect(() => {
-    axios
-      .get('https://localhost:7270/api/Purchases/purchases-view', {
-        params: {
-          sortBy,
-          order: sortOrder,
-          activities: activityFilters.join(','),
-          paymentMethods: selectedPaymentMethods.join(','),
-          clientGender: selectedGender,
-          minCost,
-          maxCost,
-          purchaseDate
-        }
-      })
+    axios.get('https://localhost:7270/api/Purchases/purchases-view', {
+      params: {
+        sortBy,
+        order: sortOrder,
+        activities: activityFilters.join(','),
+        paymentMethods: selectedPaymentMethods.join(','),
+        clientGender: selectedGender,
+        minCost,
+        maxCost,
+        purchaseDate
+      }
+    })
       .then(res => {
         setAllPurchases(res.data)
         setCurrentPage(1)
@@ -73,45 +70,12 @@ export default function PurchaseList() {
       .catch(err => console.error('Помилка завантаження:', err))
   }, [trigger, sortBy, sortOrder])
 
-  const totalPages = Math.ceil(allPurchases.length / ITEMS_PER_PAGE)
+  const totalPages = Math.ceil(filteredPurchases.length / ITEMS_PER_PAGE)
 
-  const visiblePurchases = allPurchases.slice(
+  const visiblePurchases = filteredPurchases.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,
     currentPage * ITEMS_PER_PAGE
   )
-
-  const renderPagination = () => {
-    const pages = []
-    pages.push(1)
-
-    if (currentPage > 3) pages.push('...')
-
-    const start = Math.max(2, currentPage - 1)
-    const end = Math.min(totalPages - 1, currentPage + 1)
-
-    for (let i = start; i <= end; i++) pages.push(i)
-
-    if (currentPage < totalPages - 2) pages.push('...')
-    if (totalPages > 1) pages.push(totalPages)
-
-    return pages.map((page, idx) =>
-      typeof page === 'number' ? (
-        <button
-          key={idx}
-          onClick={() => setCurrentPage(page)}
-          className={`w-8 h-8 rounded text-sm ${
-            currentPage === page
-              ? 'bg-primary text-white'
-              : 'bg-white border text-gray-600 hover:bg-gray-100'
-          }`}
-        >
-          {page}
-        </button>
-      ) : (
-        <span key={idx} className="px-2 text-gray-400 text-sm">...</span>
-      )
-    )
-  }
 
   return (
     <div className={`flex flex-col gap-6 ${isFilterOpen ? 'w-[75%]' : 'w-[100%]'}`}>
@@ -132,8 +96,8 @@ export default function PurchaseList() {
           { value: 'subscriptionTotalCost', label: 'Ціна абонемента' },
           { value: 'subscriptionName', label: 'Назва абонемента' }
         ]}
-        triggerSearch={() => setTrigger(prev => prev +1)}>
-          
+        triggerSearch={() => setTrigger(prev => prev + 1)}
+      >
         <div className="flex flex-col gap-4 text-sm text-gray-700">
           {/* Payment methods */}
           <p className="font-semibold">Метод оплати:</p>
@@ -234,16 +198,16 @@ export default function PurchaseList() {
         </div>
       </Header>
 
-
       <div className={`grid gap-4 grid-cols-1 md:grid-cols-2 ${isFilterOpen ? 'xl:grid-cols-2' : 'xl:grid-cols-3'} items-start`}>
-        {filteredPurchases.map(p => (
-          <PurchaseCard 
-            key={p.purchaseNumber} 
-            purchase={p} 
-            searchTerm={search}
+        {visiblePurchases.map(p => (
+          <PurchaseCard
+            key={p.purchaseNumber}
+            purchase={p}
+            search={search}
             expandedCardId={expandedCardId}
             setExpandedCardId={setExpandedCardId}
-            onDelete={handleDeletePurchase}/>
+            onDelete={handleDeletePurchase}
+          />
         ))}
       </div>
 
@@ -258,7 +222,7 @@ export default function PurchaseList() {
           &lt;
         </button>
 
-        {renderPagination()}
+        {renderPagination(currentPage, totalPages, setCurrentPage)}
 
         <button
           onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}

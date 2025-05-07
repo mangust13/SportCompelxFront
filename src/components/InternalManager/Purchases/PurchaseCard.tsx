@@ -8,13 +8,13 @@ import 'react-toastify/dist/ReactToastify.css'
 
 type Props = {
   purchase: PurchaseDto
-  searchTerm: string
+  search: string
   expandedCardId: number | null
   setExpandedCardId: (id: number | null) => void
   onDelete: (purchaseId: number) => void
 }
 
-export default function PurchaseCard({ purchase, searchTerm, expandedCardId, setExpandedCardId, onDelete }: Props) {
+export default function PurchaseCard({ purchase, search, expandedCardId, setExpandedCardId, onDelete }: Props) {
   const [isEditing, setIsEditing] = useState(false)
   const isExpanded = expandedCardId === purchase.purchaseNumber
   const contentRef = useRef<HTMLDivElement>(null)
@@ -86,10 +86,10 @@ export default function PurchaseCard({ purchase, searchTerm, expandedCardId, set
   const isActive = !isExpired && trainingsLeft > 0
 
   return (
-    <div className={`shadow-md rounded-xl p-4 flex flex-col gap-2 border-2 ${isActive ? 'border-green-500' : 'border-red-500'}`}>
+    <div className={`bg-white shadow-md rounded-xl p-4 flex flex-col gap-2 border-2 ${isActive ? 'border-green-500' : 'border-red-500'}`}>
       {/* Верхній блок */}
       <div className="flex justify-between items-start text-sm text-gray-500">
-        <span>{highlightMatch(`Покупка №${purchase.purchaseNumber}`, searchTerm)}</span>
+        <span>{highlightMatch(`Покупка №${purchase.purchaseNumber}`, search)}</span>
         <div className="flex items-center gap-2">
           <span className={`px-2 py-0.5 rounded text-white text-xs ${isActive ? 'bg-green-500' : 'bg-red-500'}`}>
             {isActive ? 'Активний' : 'Неактивний'}
@@ -102,13 +102,13 @@ export default function PurchaseCard({ purchase, searchTerm, expandedCardId, set
       {/* Абонемент */}
       <div>
         <h3 className="font-bold text-lg text-primary">
-          {highlightMatch(purchase.subscriptionName, searchTerm)}
+          {highlightMatch(purchase.subscriptionName, search)}
         </h3>
-        <p className="text-sm text-gray-700">Ціна: {highlightMatch(purchase.subscriptionTotalCost, searchTerm)} грн</p>
-        <p className="text-sm text-gray-700">Оплата: {highlightMatch(purchase.paymentMethod, searchTerm)}</p>
+        <p className="text-sm text-gray-700">Ціна: {highlightMatch(purchase.subscriptionTotalCost, search)} грн</p>
+        <p className="text-sm text-gray-700">Оплата: {highlightMatch(purchase.paymentMethod, search)}</p>
         <p className="text-sm text-gray-700">
-          Термін: {highlightMatch(purchase.subscriptionTerm, searchTerm)} | Час:{' '}
-          {highlightMatch(purchase.subscriptionVisitTime, searchTerm)}
+          Термін: {highlightMatch(purchase.subscriptionTerm, search)} | Час:{' '}
+          {highlightMatch(purchase.subscriptionVisitTime, search)}
         </p>
         <p className="text-sm text-gray-700">
           Використано тренувань: <span className="font-semibold">{trainingsUsed} / {totalTrainings}</span>
@@ -123,9 +123,9 @@ export default function PurchaseCard({ purchase, searchTerm, expandedCardId, set
 
       {/* Клієнт */}
       <div className="mt-2 text-sm">
-        <p><span className="font-semibold">Клієнт:</span> {highlightMatch(purchase.clientFullName, searchTerm)}</p>
-        <p><span className="font-semibold">Стать:</span> {highlightMatch(purchase.clientGender, searchTerm)}</p>
-        <p><span className="font-semibold">Телефон:</span> {highlightMatch(purchase.clientPhoneNumber, searchTerm)}</p>
+        <p><span className="font-semibold">Клієнт:</span> {highlightMatch(purchase.clientFullName, search)}</p>
+        <p><span className="font-semibold">Стать:</span> {highlightMatch(purchase.clientGender, search)}</p>
+        <p><span className="font-semibold">Телефон:</span> {highlightMatch(purchase.clientPhoneNumber, search)}</p>
       </div>
 
       {/* Види активності */}
@@ -138,7 +138,7 @@ export default function PurchaseCard({ purchase, searchTerm, expandedCardId, set
               {purchase.activities.map((a, i) => (
                 <span key={i}>
                   {i > 0 && ', '}
-                  {highlightMatch(a.activityName, searchTerm)}
+                  {highlightMatch(a.activityName, search)}
                 </span>
               ))}
             </p>
@@ -152,10 +152,10 @@ export default function PurchaseCard({ purchase, searchTerm, expandedCardId, set
               <ul className="space-y-2 text-sm text-gray-700">
                 {purchase.activities.map((a, i) => (
                   <li key={i} className="border p-2 rounded-md bg-gray-50">
-                    <p className="font-semibold">{highlightMatch(a.activityName, searchTerm)}</p>
+                    <p className="font-semibold">{highlightMatch(a.activityName, search)}</p>
                     <p>Кількість тренувань: {a.activityTypeAmount}</p>
                     <p>Ціна за тренування: {a.activityPrice} грн</p>
-                    <p className="text-xs text-gray-600">{highlightMatch(a.activityDescription || '', searchTerm)}</p>
+                    <p className="text-xs text-gray-600">{highlightMatch(a.activityDescription || '', search)}</p>
                   </li>
                 ))}
               </ul>
