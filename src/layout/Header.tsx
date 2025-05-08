@@ -13,12 +13,13 @@ type FilterHeaderProps = {
   sortOptions?: { value: string, label: string }[]
   triggerSearch?: () => void
   children?: React.ReactNode
+  onExportClick?: () => void
 }
 
   
   export default function FilterHeader({
     title, total, isFilterOpen, setIsFilterOpen, searchTerm, setSearchTerm,
-    sortBy, setSortBy, sortOrder, setSortOrder, sortOptions, triggerSearch, onAddNew, children
+    sortBy, setSortBy, sortOrder, setSortOrder, sortOptions, triggerSearch, onAddNew, children, onExportClick
   }: FilterHeaderProps) {
     return (
       <div className="relative bg-white shadow-sm p-4 rounded-xl flex flex-col gap-4">
@@ -28,11 +29,16 @@ type FilterHeaderProps = {
           </h2>
   
           <div className="flex items-center gap-2">
+            {onExportClick && (
+            <button
+              onClick={onExportClick}
+              className="bg-green-600 text-white text-sm px-3 py-1 rounded hover:opacity-90">
+              📤 Експорт
+            </button>)}
             {onAddNew && (
               <button
                 onClick={onAddNew}
-                className="bg-primary text-white text-sm px-3 py-1 rounded hover:opacity-90"
-              >
+                className="bg-primary text-white text-sm px-3 py-1 rounded hover:opacity-90">
                 + Додати
               </button>
             )}

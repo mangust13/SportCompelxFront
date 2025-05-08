@@ -4,6 +4,8 @@ import { SubscriptionDto } from '../../../constants/types'
 import SubscriptionCard from './SubscriptionCard'
 import AddSubscriptionModal from './AddSubscriptionActivity'
 import Header from '../../../layout/Header'
+import { ExportModal } from '../../ExportModal'
+import {exportData} from '../../../constants/exportData'
 
 export default function SubscriptionList() {
   const [subscriptions, setSubscriptions] = useState<SubscriptionDto[]>([])
@@ -22,6 +24,13 @@ export default function SubscriptionList() {
 
   const [selectedVisitTime, setSelectedVisitTime] = useState<string>('')
   const [selectedTerm, setSelectedTerm] = useState<string>('')
+
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false)
+
+  const handleExportFormat = (format: string) => {
+    exportData(format, filteredSubscriptions)
+    setIsExportModalOpen(false)
+  }
 
   const handleDeleteSubscription = (subscriptionId: number) => {
     setSubscriptions(prev => prev.filter(p => p.subscriptionId !== subscriptionId))
@@ -55,7 +64,7 @@ export default function SubscriptionList() {
             order: sortOrder,
             minCost,
             maxCost,
-            activities: activityFilters.join(','), // як CSV рядок
+            activities: activityFilters.join(','),
             visitTime: selectedVisitTime,
             term: selectedTerm
           }
@@ -90,6 +99,7 @@ export default function SubscriptionList() {
           { value: 'term', label: 'Термін' }
         ]}
         onAddNew={() => setIsAddingNew(true)}
+        onExportClick={() => setIsExportModalOpen(true)}
       >
         {/* Filters */}
         <div className="flex flex-col gap-4 text-sm text-gray-700">
@@ -190,6 +200,12 @@ export default function SubscriptionList() {
           />
         ))}
       </div>
+      {isExportModalOpen && (
+        <ExportModal
+          onClose={() => setIsExportModalOpen(false)}
+          onSelectFormat={handleExportFormat}
+        />
+      )}
       {isAddingNew && (
         <AddSubscriptionModal
           onClose={() => setIsAddingNew(false)}

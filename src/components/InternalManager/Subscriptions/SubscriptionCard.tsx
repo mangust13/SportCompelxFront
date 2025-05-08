@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { SubscriptionDto } from '../../../constants/types'
 import { highlightMatch } from '../../../constants/highlightMatch'
-import EditPurchaseModal from '../Purchases/EditPurchaseModal'
+import EditPurchase from '../Purchases/EditPurchase'
 import AddPurchaseModal from './AddPurchase'
 import axios from 'axios'
 import { toast } from 'react-toastify'
@@ -77,7 +77,6 @@ export default function SubscriptionCard({ subscription, searchTerm, expandedCar
 
   return (
     <div className="bg-white shadow-md rounded-xl p-4 flex flex-col gap-2">
-      {/* Верхній блок: Назва + Іконка */}
       <div className="flex justify-between items-start text-sm text-gray-500">
         <h3 className="text-lg font-bold text-primary">
           {highlightMatch(subscription.subscriptionName, searchTerm)}
@@ -98,15 +97,11 @@ export default function SubscriptionCard({ subscription, searchTerm, expandedCar
           </button>
       </div>
 
-      {/* Основна інформація про підписку */}
       <p className="text-sm text-gray-700">Ціна: {highlightMatch(subscription.subscriptionTotalCost, searchTerm)} грн</p>
       <p className="text-sm text-gray-700">
         Термін: {highlightMatch(subscription.subscriptionTerm, searchTerm)} | Час: {highlightMatch(subscription.subscriptionVisitTime, searchTerm)}
       </p>
 
-      
-
-      {/* Види активності */}
       <div className="mt-2 text-sm">
         <p className="font-semibold mb-1">Види активності:</p>
 

@@ -4,6 +4,8 @@ import { OrderDto } from '../../../constants/types'
 import Header from '../../../layout/Header'
 import OrderCard from './OrderCard'
 import { renderPagination } from '../../../constants/pagination'
+import { ExportModal } from '../../ExportModal'
+import {exportData} from '../../../constants/exportData'
 
 type SupplierDto = { supplierId: number, supplierName: string }
 type BrandDto = { brandId: number, brandName: string }
@@ -18,8 +20,8 @@ export default function OrderList() {
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
   const [sortBy, setSortBy] = useState('orderDate')
 
-  const [supplierFilter, setSupplierFilter] = useState<number>(0) // id!
-  const [brandFilter, setBrandFilter] = useState<number>(0)       // id!
+  const [supplierFilter, setSupplierFilter] = useState<number>(0) 
+  const [brandFilter, setBrandFilter] = useState<number>(0)     
   const [minTotal, setMinTotal] = useState<number | null>(null)
   const [maxTotal, setMaxTotal] = useState<number | null>(null)
   const [orderDate, setOrderDate] = useState<string>('')
@@ -29,6 +31,12 @@ export default function OrderList() {
 
   const [trigger, setTrigger] = useState(0)
   const [currentPage, setCurrentPage] = useState(1)
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false)
+
+  const handleExportFormat = (format: string) => {
+    exportData(format, filteredOrders)
+    setIsExportModalOpen(false)
+  }  
 
   useEffect(() => {
     axios.get<SupplierDto[]>('https://localhost:7270/api/Orders/all-suppliers')
@@ -101,6 +109,7 @@ export default function OrderList() {
           { value: 'orderDate', label: 'Дата замовлення' }
         ]}
         triggerSearch={() => setTrigger(prev => prev + 1)}
+        onExportClick={() => setIsExportModalOpen(true)}
       >
         <div className="flex flex-col gap-4 text-sm text-gray-700">
           {/* Supplier filter */}
@@ -209,6 +218,13 @@ export default function OrderList() {
           &gt;
         </button>
       </div>
+
+      {isExportModalOpen && (
+        <ExportModal
+          onClose={() => setIsExportModalOpen(false)}
+          onSelectFormat={handleExportFormat}
+        />
+      )}
     </div>
   )
 }

@@ -4,6 +4,8 @@ import { AttendanceRecordDto } from '../../constants/types'
 import AttendanceCard from './AttendanceCard'
 import Header from '../../layout/Header'
 import { ITEMS_PER_PAGE, renderPagination } from '../../constants/pagination'
+import { ExportModal } from '../ExportModal'
+import {exportData} from '../../constants/exportData'
 
 export default function AttendanceList() {
   const [allAttendances, setAllAttendances] = useState<AttendanceRecordDto[]>([])
@@ -16,6 +18,7 @@ export default function AttendanceList() {
   const [availableActivities, setAvailableActivities] = useState<string[]>([])
   const [selectedDate, setSelectedDate] = useState<string>('')
   const [trigger, setTrigger] = useState(0)
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false)
 
   const filteredAttendances = allAttendances.filter(a =>
     a.purchaseNumber.toString().includes(search) ||
@@ -31,6 +34,11 @@ export default function AttendanceList() {
     a.trainingActivity.toLowerCase().includes(search.toLowerCase()) ||
     new Date(a.attendanceDateTime).toLocaleString().toLowerCase().includes(search.toLowerCase())
   )
+
+  const handleExportFormat = (format: string) => {
+    exportData(format, filteredAttendances)
+    setIsExportModalOpen(false)
+  }
 
   useEffect(() => {
     axios.get('https://localhost:7270/api/Activities')
@@ -86,6 +94,7 @@ export default function AttendanceList() {
           { value: 'purchaseDate', label: 'Дата покупки' }
         ]}
         triggerSearch={() => setTrigger(prev => prev + 1)}
+        onExportClick={() => setIsExportModalOpen(true)}
       >
         <div className="flex flex-col gap-4 text-sm text-gray-700">
           {/* Date filter */}
@@ -164,6 +173,13 @@ export default function AttendanceList() {
           &gt;
         </button>
       </div>
+
+      {isExportModalOpen && (
+        <ExportModal
+          onClose={() => setIsExportModalOpen(false)}
+          onSelectFormat={handleExportFormat}
+        />
+      )}
     </div>
   )
 }

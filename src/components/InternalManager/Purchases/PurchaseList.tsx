@@ -4,6 +4,9 @@ import { PurchaseDto } from '../../../constants/types'
 import PurchaseCard from './PurchaseCard'
 import Header from '../../../layout/Header'
 import { ITEMS_PER_PAGE, renderPagination } from '../../../constants/pagination'
+import { ExportModal } from '../../ExportModal'
+import {exportData} from '../../../constants/exportData'
+
 
 export default function PurchaseList() {
   const [allPurchases, setAllPurchases] = useState<PurchaseDto[]>([])
@@ -21,6 +24,7 @@ export default function PurchaseList() {
   const [maxCost, setMaxCost] = useState<number | null>(null)
   const [purchaseDate, setPurchaseDate] = useState<string>('')
   const [trigger, setTrigger] = useState(0)
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false)
 
   const filteredPurchases = allPurchases.filter(p =>
     p.purchaseNumber.toString().toLowerCase().includes(search.toLowerCase()) ||
@@ -36,6 +40,11 @@ export default function PurchaseList() {
       a.activityName.toLowerCase().includes(search.toLowerCase())
     )
   )
+
+  const handleExportFormat = (format: string) => {
+    exportData(format, filteredPurchases)
+    setIsExportModalOpen(false)
+  }
 
   const handleDeletePurchase = (purchaseId: number) => {
     setAllPurchases(prev => prev.filter(p => p.purchaseId !== purchaseId))
@@ -97,7 +106,8 @@ export default function PurchaseList() {
           { value: 'subscriptionName', label: 'Назва абонемента' }
         ]}
         triggerSearch={() => setTrigger(prev => prev + 1)}
-      >
+        onExportClick={() => setIsExportModalOpen(true)}>
+        
         <div className="flex flex-col gap-4 text-sm text-gray-700">
           {/* Payment methods */}
           <p className="font-semibold">Метод оплати:</p>
@@ -207,6 +217,10 @@ export default function PurchaseList() {
             expandedCardId={expandedCardId}
             setExpandedCardId={setExpandedCardId}
             onDelete={handleDeletePurchase}
+            onUpdate={(updatedPurchase) => {
+              console.log('оновлено:', updatedPurchase);
+              setAllPurchases(prev => prev.map(pp => pp.purchaseId === updatedPurchase.purchaseId ? updatedPurchase : pp))
+            }}
           />
         ))}
       </div>
@@ -234,6 +248,13 @@ export default function PurchaseList() {
           &gt;
         </button>
       </div>
+
+      {isExportModalOpen && (
+        <ExportModal
+          onClose={() => setIsExportModalOpen(false)}
+          onSelectFormat={handleExportFormat}
+        />
+      )}
     </div>
   )
 }

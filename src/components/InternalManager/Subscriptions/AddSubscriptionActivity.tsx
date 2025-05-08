@@ -188,7 +188,16 @@ export default function AddSubscriptionModal({ onClose, onSuccess }: Props) {
     }
 
     try {
-      await axios.post('https://localhost:7270/api/Subscriptions', newSub)
+      await axios.post(
+        'https://localhost:7270/api/Subscriptions', 
+        newSub,
+        {
+          headers: {
+            'X-User-Name': localStorage.getItem('username') || 'Anonymous',
+            'X-User-Role': localStorage.getItem('role') || 'Unknown'
+          }
+        }
+      )
       toast.success('Абонемент успішно створено!')
       onSuccess()
     } catch (error) {

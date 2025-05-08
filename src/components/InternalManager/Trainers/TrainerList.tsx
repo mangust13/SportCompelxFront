@@ -4,6 +4,8 @@ import Header from '../../../layout/Header'
 import TrainerCard from './TrainerCard'
 import { TrainerFullScheduleDto } from '../../../constants/types'
 import AddTrainer from './AddTrainer'
+import { ExportModal } from '../../ExportModal'
+import {exportData} from '../../../constants/exportData'
 
 export default function TrainerList() {
   const [trainers, setTrainers] = useState<TrainerFullScheduleDto[]>([])
@@ -20,11 +22,12 @@ export default function TrainerList() {
   const [trigger, setTrigger] = useState(0)
   const [isAddingTrainer, setIsAddingTrainer] = useState(false)
 
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false)
+  
   const handleAddTrainerSuccess = () => {
     fetchTrainers()
     setIsAddingTrainer(false)
   }
-
 
   const fetchTrainers = async () => {
     try {
@@ -56,6 +59,11 @@ export default function TrainerList() {
     fetchTrainers()
   }, [trigger])
 
+  const handleExportFormat = (format: string) => {
+    exportData(format, trainers)
+    setIsExportModalOpen(false)
+  }
+
   return (
     <div className={`flex flex-col gap-6 ${isFilterOpen ? 'w-[75%]' : 'w-[100%]'}`}>
       <Header
@@ -65,7 +73,8 @@ export default function TrainerList() {
         setIsFilterOpen={setIsFilterOpen}
         searchTerm={searchTerm}
         setSearchTerm={setSearchTerm}
-        onAddNew={() => setIsAddingTrainer(true)}>
+        onAddNew={() => setIsAddingTrainer(true)}
+        onExportClick={() => setIsExportModalOpen(true)}>
 
         {/* Filters */}
         <div className="flex flex-col gap-4 text-sm text-gray-700">
@@ -163,7 +172,15 @@ export default function TrainerList() {
           }}
         />
       )}
-
+      {isExportModalOpen && (
+      <ExportModal
+        onClose={() => setIsExportModalOpen(false)}
+        onSelectFormat={(format) => {
+          exportData(format, trainers)
+          setIsExportModalOpen(false)
+        }}
+      />
+    )}
     </div>
   )
 }
