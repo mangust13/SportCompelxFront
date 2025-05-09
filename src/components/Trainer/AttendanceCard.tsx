@@ -1,5 +1,5 @@
-import { AttendanceRecordDto } from '../../constants/types'
-import { highlightMatch } from '../../constants/highlightMatch'
+import { AttendanceRecordDto } from '../../utils/types'
+import { highlightMatch } from '../../utils/highlightMatch'
 
 type Props = {
   attendance: AttendanceRecordDto

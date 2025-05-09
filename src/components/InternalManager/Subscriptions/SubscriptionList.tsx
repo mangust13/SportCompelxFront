@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react'
 import axios from 'axios'
-import { SubscriptionDto } from '../../../constants/types'
+import { SubscriptionDto } from '../../../utils/types'
 import SubscriptionCard from './SubscriptionCard'
 import AddSubscriptionModal from './AddSubscriptionActivity'
 import Header from '../../../layout/Header'
 import { ExportModal } from '../../ExportModal'
-import {exportData} from '../../../constants/exportData'
+import {exportData} from '../../../utils/exportData'
 
 export default function SubscriptionList() {
   const [subscriptions, setSubscriptions] = useState<SubscriptionDto[]>([])
@@ -13,7 +13,7 @@ export default function SubscriptionList() {
   const [searchTerm, setSearchTerm] = useState('')
   const [expandedCardId, setExpandedCardId] = useState<number | null>(null)
   const [isAddingNew, setIsAddingNew] = useState(false)
-  const [sortBy, setSortBy] = useState('name')
+  const [sortBy, setSortBy] = useState('cost')
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
   const [trigger, setTrigger] = useState(0)
   const [minCost, setMinCost] = useState<number | null>(null)

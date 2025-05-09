@@ -7,6 +7,8 @@ import TrainerList from "../components/InternalManager/Trainers/TrainerList";
 import AttendanceList from "../components/Trainer/AttendanceList";
 import OrderList from '../components/PurchaseManager/Orders/OrderList';
 import SupplierList from '../components/PurchaseManager/Suppliers/SupplierList';
+import TrainerProfile from '../components/Trainer/TrainerProfile';
+import ProductList from '../components/PurchaseManager/Products/ProductList';
 
 export default function Layout()
 {
@@ -53,6 +55,10 @@ export default function Layout()
             <AttendanceList />
           )}
 
+          {currentTable === "Мій розклад" && user.role === "Trainer" && (
+            <TrainerProfile />
+          )}
+
           {/* PurchaseManager */}
           {currentTable === "Поставки" && user.role === "PurchaseManager" && (
             <OrderList />
@@ -60,6 +66,10 @@ export default function Layout()
 
           {currentTable === "Постачальники" && user.role === "PurchaseManager" && (
             <SupplierList />
+          )}
+
+          {currentTable === "Типи продуктів" && user.role === "PurchaseManager" && (
+            <ProductList />
           )}
 
           </main>

@@ -105,3 +105,12 @@ export type OrderDto = {
   supplierName: string
   purchasedProducts: PurchasedProductDto[]
 }
+
+
+export type ProductDto = {
+  productId: number
+  brandName: string
+  productModel: string
+  productType: string
+  productDescription: string
+}

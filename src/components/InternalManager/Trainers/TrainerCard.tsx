@@ -3,8 +3,8 @@ import { useState, useRef, useEffect } from 'react'
 import TimePicker from 'react-time-picker'
 import 'react-time-picker/dist/TimePicker.css'
 import { toast } from 'react-toastify'
-import { highlightMatch } from '../../../constants/highlightMatch'
-import { TrainerFullScheduleDto, TrainerScheduleEntryDto } from '../../../constants/types'
+import { highlightMatch } from '../../../utils/highlightMatch'
+import { TrainerFullScheduleDto, TrainerScheduleEntryDto } from '../../../utils/types'
 
 type Props = {
   trainer: TrainerFullScheduleDto

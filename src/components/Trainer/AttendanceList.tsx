@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react'
 import axios from 'axios'
-import { AttendanceRecordDto } from '../../constants/types'
+import { AttendanceRecordDto } from '../../utils/types'
 import AttendanceCard from './AttendanceCard'
 import Header from '../../layout/Header'
-import { ITEMS_PER_PAGE, renderPagination } from '../../constants/pagination'
+import { ITEMS_PER_PAGE, renderPagination } from '../../utils/pagination'
 import { ExportModal } from '../ExportModal'
-import {exportData} from '../../constants/exportData'
+import {exportData} from '../../utils/exportData'
+import AddAttendance from './AddAttendance'
+
 
 export default function AttendanceList() {
   const [allAttendances, setAllAttendances] = useState<AttendanceRecordDto[]>([])
@@ -19,6 +21,7 @@ export default function AttendanceList() {
   const [selectedDate, setSelectedDate] = useState<string>('')
   const [trigger, setTrigger] = useState(0)
   const [isExportModalOpen, setIsExportModalOpen] = useState(false)
+  const [isAddingNew, setIsAddingNew] = useState(false)
 
   const filteredAttendances = allAttendances.filter(a =>
     a.purchaseNumber.toString().includes(search) ||
@@ -94,6 +97,7 @@ export default function AttendanceList() {
           { value: 'purchaseDate', label: 'Дата покупки' }
         ]}
         triggerSearch={() => setTrigger(prev => prev + 1)}
+        onAddNew={() => setIsAddingNew(true)}
         onExportClick={() => setIsExportModalOpen(true)}
       >
         <div className="flex flex-col gap-4 text-sm text-gray-700">
@@ -180,6 +184,13 @@ export default function AttendanceList() {
           onSelectFormat={handleExportFormat}
         />
       )}
+      {isAddingNew && (
+              <AddAttendance
+                onClose={() => setIsAddingNew(false)}
+                onSuccess={() => {
+                  setIsAddingNew(false)
+                }}/>
+            )}
     </div>
   )
 }

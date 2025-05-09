@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
-import { SubscriptionDto } from '../../../constants/types'
-import { highlightMatch } from '../../../constants/highlightMatch'
+import { SubscriptionDto } from '../../../utils/types'
+import { highlightMatch } from '../../../utils/highlightMatch'
 import EditPurchase from '../Purchases/EditPurchase'
 import AddPurchaseModal from './AddPurchase'
 import axios from 'axios'

@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, ReactNode } from 'react';
-import { Role } from '../constants/accessbyRole';
+import { Role } from '../utils/accessbyRole';
 
 
 interface User {

@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react'
 import axios from 'axios'
-import { PurchaseDto } from '../../../constants/types'
+import { PurchaseDto } from '../../../utils/types'
 import PurchaseCard from './PurchaseCard'
 import Header from '../../../layout/Header'
-import { ITEMS_PER_PAGE, renderPagination } from '../../../constants/pagination'
+import { ITEMS_PER_PAGE, renderPagination } from '../../../utils/pagination'
 import { ExportModal } from '../../ExportModal'
-import {exportData} from '../../../constants/exportData'
+import {exportData} from '../../../utils/exportData'
 
 
 export default function PurchaseList() {

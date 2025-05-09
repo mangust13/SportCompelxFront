@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react'
 import axios from 'axios'
-import { OrderDto } from '../../../constants/types'
+import { OrderDto } from '../../../utils/types'
 import Header from '../../../layout/Header'
 import OrderCard from './OrderCard'
-import { renderPagination } from '../../../constants/pagination'
+import { renderPagination } from '../../../utils/pagination'
 import { ExportModal } from '../../ExportModal'
-import {exportData} from '../../../constants/exportData'
+import {exportData} from '../../../utils/exportData'
 
 type SupplierDto = { supplierId: number, supplierName: string }
 type BrandDto = { brandId: number, brandName: string }

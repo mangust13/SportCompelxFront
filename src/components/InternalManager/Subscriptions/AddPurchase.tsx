@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react'
 import axios from 'axios'
-import { SubscriptionDto } from '../../../constants/types'
+import { SubscriptionDto } from '../../../utils/types'
 import { toast } from 'react-toastify'
 import Select from 'react-select'
+import { getAuthHeaders } from '../../../utils/authHeaders'
+
 
 type ClientDto = {
   clientId: number
@@ -46,11 +48,15 @@ export default function AddPurchaseModal({ subscription, onClose, onSuccess }: P
 
   const handleAddNewClient = async () => {
     try {
-      const response = await axios.post<ClientDto>('https://localhost:7270/api/Clients', {
-        clientFullName: newClientName.trim(),
-        clientPhoneNumber: newClientPhone.trim(),
-        clientGender: newClientGender
-      })
+      const response = await axios.post<ClientDto>(
+        'https://localhost:7270/api/Clients', 
+        {
+          clientFullName: newClientName.trim(),
+          clientPhoneNumber: newClientPhone.trim(),
+          clientGender: newClientGender
+        },
+        {headers: getAuthHeaders()}
+      )
 
       const newClient = {
         clientId: response.data.clientId,
@@ -77,11 +83,15 @@ export default function AddPurchaseModal({ subscription, onClose, onSuccess }: P
     if (!selectedClientId) return
 
     try {
-      await axios.put(`https://localhost:7270/api/Clients/${selectedClientId}`, {
-        clientFullName: editClientName.trim(),
-        clientPhoneNumber: editClientPhone.trim(),
-        clientGender: editClientGender
-      })
+      await axios.put(
+        `https://localhost:7270/api/Clients/${selectedClientId}`, 
+        {
+          clientFullName: editClientName.trim(),
+          clientPhoneNumber: editClientPhone.trim(),
+          clientGender: editClientGender
+        },
+        {headers: getAuthHeaders()}  
+      )
 
       setClients(prev =>
         prev.map(c =>
@@ -103,7 +113,10 @@ export default function AddPurchaseModal({ subscription, onClose, onSuccess }: P
     if (!confirm('Ви точно хочете видалити цього клієнта?')) return
 
     try {
-      await axios.delete(`https://localhost:7270/api/Clients/${selectedClientId}`)
+      await axios.delete(
+        `https://localhost:7270/api/Clients/${selectedClientId}`,
+        {headers: getAuthHeaders()}
+      )
       setClients(prev => prev.filter(c => c.clientId !== selectedClientId))
       setSelectedClientId(null)
       toast.success('Клієнт видалений!')
@@ -119,11 +132,15 @@ export default function AddPurchaseModal({ subscription, onClose, onSuccess }: P
     }
 
     try {
-      await axios.post('https://localhost:7270/api/Purchases', {
-        clientId: selectedClientId,
-        subscriptionId: subscription.subscriptionId,
-        paymentMethodId: paymentMethodId
-      })
+      await axios.post(
+        'https://localhost:7270/api/Purchases', 
+        {
+          clientId: selectedClientId,
+          subscriptionId: subscription.subscriptionId,
+          paymentMethodId: paymentMethodId
+        },
+        {headers: getAuthHeaders()}
+      )
 
       toast.success('Покупка успішно оформлена!')
       onSuccess()

@@ -1,4 +1,4 @@
-import { accessbyRole, Role } from "../constants/accessbyRole";
+import { accessbyRole, Role } from "../utils/accessbyRole";
 import UserProfile from "./UserProfile";
 import Logo from "/assets/Logo.png"
 

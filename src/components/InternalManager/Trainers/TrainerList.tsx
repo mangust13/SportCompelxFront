@@ -2,10 +2,10 @@ import { useEffect, useState } from 'react'
 import axios from 'axios'
 import Header from '../../../layout/Header'
 import TrainerCard from './TrainerCard'
-import { TrainerFullScheduleDto } from '../../../constants/types'
+import { TrainerFullScheduleDto } from '../../../utils/types'
 import AddTrainer from './AddTrainer'
 import { ExportModal } from '../../ExportModal'
-import {exportData} from '../../../constants/exportData'
+import {exportData} from '../../../utils/exportData'
 
 export default function TrainerList() {
   const [trainers, setTrainers] = useState<TrainerFullScheduleDto[]>([])

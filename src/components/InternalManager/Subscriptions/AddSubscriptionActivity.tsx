@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
-import { SubscriptionDto } from '../../../constants/types'
+import { SubscriptionDto } from '../../../utils/types'
 import axios from 'axios'
 import { toast } from 'react-toastify'
+import { getAuthHeaders } from '../../../utils/authHeaders'
 
 type ActivityDto = {
   activityId: number
@@ -78,11 +79,15 @@ export default function AddSubscriptionModal({ onClose, onSuccess }: Props) {
 
   const handleAddNewActivity = async () => {
     try {
-      const response = await axios.post<ActivityDto>('https://localhost:7270/api/Activities', {
-        activityName: newActivityName.trim(),
-        activityPrice: newActivityPrice,
-        activityDescription: newActivityDescription.trim()
-      })
+      const response = await axios.post<ActivityDto>(
+        'https://localhost:7270/api/Activities', 
+        {
+          activityName: newActivityName.trim(),
+          activityPrice: newActivityPrice,
+          activityDescription: newActivityDescription.trim()
+        },
+        {headers: getAuthHeaders()}
+      )
 
       const newActivity = response.data
 
@@ -140,7 +145,10 @@ export default function AddSubscriptionModal({ onClose, onSuccess }: Props) {
           <button
             onClick={async () => {
               try {
-                await axios.delete(`https://localhost:7270/api/Activities/${id}`)
+                await axios.delete(
+                  `https://localhost:7270/api/Activities/${id}`,
+                  {headers: getAuthHeaders()}
+                )
                 setActivities(prev => prev.filter(a => a.activityId !== id))
                 setSelectedActivities(prev => prev.filter(a => a.activity.activityId !== id))
                 toast.success('Активність видалена!')
@@ -188,16 +196,7 @@ export default function AddSubscriptionModal({ onClose, onSuccess }: Props) {
     }
 
     try {
-      await axios.post(
-        'https://localhost:7270/api/Subscriptions', 
-        newSub,
-        {
-          headers: {
-            'X-User-Name': localStorage.getItem('username') || 'Anonymous',
-            'X-User-Role': localStorage.getItem('role') || 'Unknown'
-          }
-        }
-      )
+      await axios.post('https://localhost:7270/api/Subscriptions', newSub, {headers: getAuthHeaders()})
       toast.success('Абонемент успішно створено!')
       onSuccess()
     } catch (error) {

@@ -1,6 +1,7 @@
 export const accessbyRole = {
     Trainer: [
-        "Відвідування"
+        "Відвідування",
+        "Мій розклад"
       ],
     InternalManager: [
       "Покупки",
