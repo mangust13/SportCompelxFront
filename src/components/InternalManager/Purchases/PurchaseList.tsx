@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import axios from 'axios'
-import { PurchaseDto } from '../../../utils/types'
+import { PurchaseDto } from '../InternalDtos'
 import PurchaseCard from './PurchaseCard'
 import Header from '../../../layout/Header'
 import { ITEMS_PER_PAGE, renderPagination } from '../../../utils/pagination'

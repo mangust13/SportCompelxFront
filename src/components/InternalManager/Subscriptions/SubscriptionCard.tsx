@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { SubscriptionDto } from '../../../utils/types'
+import { SubscriptionDto } from '../InternalDtos'
 import { highlightMatch } from '../../../utils/highlightMatch'
 import EditPurchase from '../Purchases/EditPurchase'
 import AddPurchaseModal from './AddPurchase'

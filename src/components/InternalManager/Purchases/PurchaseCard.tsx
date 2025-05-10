@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { PurchaseDto } from '../../../utils/types'
+import { PurchaseDto } from '../InternalDtos'
 import { highlightMatch } from '../../../utils/highlightMatch'
 import EditPurchase from './EditPurchase'
 import axios from 'axios'

@@ -1,4 +1,4 @@
-import { AttendanceRecordDto } from '../../utils/types'
+import { AttendanceRecordDto } from './TrainerDtos'
 import { highlightMatch } from '../../utils/highlightMatch'
 
 type Props = {

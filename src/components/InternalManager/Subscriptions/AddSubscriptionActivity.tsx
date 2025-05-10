@@ -1,15 +1,10 @@
 import { useEffect, useState } from 'react'
-import { SubscriptionDto } from '../../../utils/types'
+import { SubscriptionDto } from '../InternalDtos'
+import { ActivityDto } from '../InternalDtos'
 import axios from 'axios'
 import { toast } from 'react-toastify'
 import { getAuthHeaders } from '../../../utils/authHeaders'
 
-type ActivityDto = {
-  activityId: number
-  activityName: string
-  activityPrice: number
-  activityDescription: string
-}
 
 const TERMS = [
   { label: '1 місяць', value: '1 місяць', multiplier: 1 },

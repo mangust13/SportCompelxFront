@@ -1,32 +1,14 @@
 import { useEffect, useState } from 'react'
 import axios from 'axios'
+import AddAttendance from './AddAttendance'
+import { Schedule } from './TrainerDtos'
+import { TrainerProfileDto } from './TrainerDtos'
+import { dayOrder } from '../../utils/types'
 
-type Activity = {
-  activityId: number
-  activityName: string
-}
-
-type Schedule = {
-  scheduleId: number
-  dayName: string
-  startTime: string
-  endTime: string
-  activityName: string
-  gymNumber: number
-  sportComplexAddress: string
-  sportComplexCity: string
-}
-
-type TrainerProfile = {
-  trainerFullName: string
-  activities: Activity[]
-  schedules: Schedule[]
-}
 
 export default function TrainerProfilePage() {
-  const [profile, setProfile] = useState<TrainerProfile | null>(null)
-
-  const dayOrder = ['Понеділок', 'Вівторок', 'Середа', 'Четвер', 'Пʼятниця', 'Субота', 'Неділя']
+  const [profile, setProfile] = useState<TrainerProfileDto | null>(null)
+  const [addingForSchedule, setAddingForSchedule] = useState<Schedule | null>(null)
 
   const groupedByDay = dayOrder.map(day => ({
     day,
@@ -44,6 +26,10 @@ export default function TrainerProfilePage() {
       .catch(err => console.error('Помилка завантаження профілю тренера:', err))
   }, [])
 
+  const handleAddAttendance = (schedule: Schedule) => {
+    setAddingForSchedule(schedule)
+  }
+
   if (!profile) return <p>Завантаження...</p>
 
   return (
@@ -52,7 +38,7 @@ export default function TrainerProfilePage() {
       <div className="bg-white shadow rounded-xl p-4">
         <h2 className="text-lg font-semibold mb-2 text-primary">Про мене</h2>
         <p className="text-sm text-gray-700 mb-2">
-          🏠 Адреса: {profile.schedules[0]?.sportComplexAddress || '-'}, {profile.schedules[0]?.sportComplexCity || '-'}
+          🏠 Адреса спорткомплексу: {profile.schedules[0]?.sportComplexAddress || '-'}, {profile.schedules[0]?.sportComplexCity || '-'}
         </p>
         <p className="text-sm text-gray-700 mb-2">
           🏋️ Спеціалізації: {profile.activities.length > 0
@@ -73,6 +59,7 @@ export default function TrainerProfilePage() {
                 <th className="border p-1">Зал</th>
                 <th className="border p-1">Початок</th>
                 <th className="border p-1">Кінець</th>
+                <th className="border p-1">Дії</th>
               </tr>
             </thead>
             <tbody>
@@ -85,6 +72,14 @@ export default function TrainerProfilePage() {
                     <td className="border p-1 text-center">№{entry.gymNumber}</td>
                     <td className="border p-1 text-center">{entry.startTime}</td>
                     <td className="border p-1 text-center">{entry.endTime}</td>
+                    <td className="border p-1 text-center">
+                      <button
+                        onClick={() => handleAddAttendance(entry)}
+                        className="text-green-500 hover:underline text-sm"
+                      >
+                        ➕ Додати відвідування
+                      </button>
+                    </td>
                   </tr>
                 ))
               )}
@@ -94,6 +89,17 @@ export default function TrainerProfilePage() {
           <p className="text-sm text-gray-500">Розклад відсутній.</p>
         )}
       </div>
+
+      {addingForSchedule && (
+        <AddAttendance
+          schedule={addingForSchedule}
+          onClose={() => setAddingForSchedule(null)}
+          onSuccess={(attendance) => {
+            console.log('Додано відвідування:', attendance)
+            setAddingForSchedule(null)
+          }}
+        />
+      )}
     </div>
   )
 }

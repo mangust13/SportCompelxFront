@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import axios from 'axios'
-import { SubscriptionDto } from '../../../utils/types'
+import { SubscriptionDto } from '../InternalDtos'
 import SubscriptionCard from './SubscriptionCard'
 import AddSubscriptionModal from './AddSubscriptionActivity'
 import Header from '../../../layout/Header'

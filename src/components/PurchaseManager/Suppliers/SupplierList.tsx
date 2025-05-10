@@ -1,13 +1,8 @@
 import { useEffect, useState } from 'react'
 import axios from 'axios'
 import Header from '../../../layout/Header'
+import { SupplierDto } from '../PurchaseDtos'
 
-type SupplierDto = {
-  supplierId: number
-  supplierName: string
-  supplierPhoneNumber: string
-  supplierLicense: string
-}
 
 export default function SupplierList() {
   const [suppliers, setSuppliers] = useState<SupplierDto[]>([])

@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react'
 import Select from 'react-select'
-import { PurchaseDto } from '../../../utils/types'
+import { PurchaseDto } from '../InternalDtos'
+import {ClientDto} from '../InternalDtos'
 import axios from 'axios'
 import { toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 
 type Props = { purchase: PurchaseDto; onClose: () => void; onSave: (updated: PurchaseDto) => void }
 type SubscriptionOption = { name: string; totalCost: number }
-type ClientDto = { clientId: number; clientFullName: string; clientPhoneNumber: string; clientGender: string }
 
 export default function EditPurchase({ purchase, onClose, onSave }: Props) {
   const [edited, setEdited] = useState<PurchaseDto>(purchase)

@@ -1,14 +1,14 @@
 import { useEffect, useState } from 'react'
 import axios from 'axios'
-import { OrderDto } from '../../../utils/types'
 import Header from '../../../layout/Header'
 import OrderCard from './OrderCard'
 import { renderPagination } from '../../../utils/pagination'
 import { ExportModal } from '../../ExportModal'
 import {exportData} from '../../../utils/exportData'
 
-type SupplierDto = { supplierId: number, supplierName: string }
-type BrandDto = { brandId: number, brandName: string }
+import { OrderDto } from '../PurchaseDtos'
+import { SupplierDto } from '../PurchaseDtos'
+import { BrandDto } from '../PurchaseDtos'
 
 const ITEMS_PER_PAGE = 10
 

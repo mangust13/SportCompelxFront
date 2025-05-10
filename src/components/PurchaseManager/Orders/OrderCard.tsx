@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { OrderDto } from '../../../utils/types';
 import { highlightMatch } from '../../../utils/highlightMatch';
+import { OrderDto } from '../PurchaseDtos';
 
 type Props = {
   order: OrderDto;

@@ -1,17 +1,10 @@
 import { useEffect, useState } from 'react'
 import axios from 'axios'
-import { SubscriptionDto } from '../../../utils/types'
 import { toast } from 'react-toastify'
 import Select from 'react-select'
 import { getAuthHeaders } from '../../../utils/authHeaders'
-
-
-type ClientDto = {
-  clientId: number
-  clientFullName: string
-  clientPhoneNumber: string
-  clientGender: string
-}
+import { ClientDto } from '../InternalDtos'
+import { SubscriptionDto } from '../InternalDtos'
 
 type Props = {
   subscription: SubscriptionDto

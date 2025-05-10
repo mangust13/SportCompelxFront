@@ -1,12 +1,11 @@
 import { useEffect, useState } from 'react'
 import axios from 'axios'
-import { AttendanceRecordDto } from '../../utils/types'
+import { AttendanceRecordDto } from './TrainerDtos'
 import AttendanceCard from './AttendanceCard'
 import Header from '../../layout/Header'
 import { ITEMS_PER_PAGE, renderPagination } from '../../utils/pagination'
 import { ExportModal } from '../ExportModal'
 import {exportData} from '../../utils/exportData'
-import AddAttendance from './AddAttendance'
 
 
 export default function AttendanceList() {
@@ -14,14 +13,14 @@ export default function AttendanceList() {
   const [currentPage, setCurrentPage] = useState(1)
   const [isFilterOpen, setIsFilterOpen] = useState(false)
   const [search, setSearchTerm] = useState('')
-  const [sortBy, setSortBy] = useState('purchaseDate')
+  const [sortBy, setSortBy] = useState('attendanceDateTime')
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
   const [activityFilters, setActivityFilters] = useState<string[]>([])
   const [availableActivities, setAvailableActivities] = useState<string[]>([])
+  const [purchaseNumberSearch, setPurchaseNumberSearch] = useState('')
   const [selectedDate, setSelectedDate] = useState<string>('')
   const [trigger, setTrigger] = useState(0)
   const [isExportModalOpen, setIsExportModalOpen] = useState(false)
-  const [isAddingNew, setIsAddingNew] = useState(false)
 
   const filteredAttendances = allAttendances.filter(a =>
     a.purchaseNumber.toString().includes(search) ||
@@ -62,7 +61,8 @@ export default function AttendanceList() {
         sortBy,
         order: sortOrder,
         activities: activityFilters.join(','),
-        date: selectedDate || undefined
+        date: selectedDate || undefined,
+        purchaseNumber: purchaseNumberSearch || undefined
       }
     })
       .then(res => {
@@ -94,10 +94,9 @@ export default function AttendanceList() {
         setSortOrder={setSortOrder}
         sortOptions={[
           { value: 'purchaseNumber', label: 'Номер покупки' },
-          { value: 'purchaseDate', label: 'Дата покупки' }
+          { value: 'attendanceDateTime', label: 'Дата відвідування' }
         ]}
         triggerSearch={() => setTrigger(prev => prev + 1)}
-        onAddNew={() => setIsAddingNew(true)}
         onExportClick={() => setIsExportModalOpen(true)}
       >
         <div className="flex flex-col gap-4 text-sm text-gray-700">
@@ -134,6 +133,19 @@ export default function AttendanceList() {
               ))}
             </div>
           </div>
+
+          {/* Номер покупки */}
+          <div>
+            <p className="font-semibold mb-1">Номер покупки:</p>
+            <input
+              type="text"
+              value={purchaseNumberSearch}
+              onChange={(e) => setPurchaseNumberSearch(e.target.value)}
+              className="border rounded px-2 py-1 w-full"
+              placeholder="Введіть номер покупки"
+            />
+          </div>
+
 
           <button
             onClick={() => setTrigger(prev => prev + 1)}
@@ -184,13 +196,6 @@ export default function AttendanceList() {
           onSelectFormat={handleExportFormat}
         />
       )}
-      {isAddingNew && (
-              <AddAttendance
-                onClose={() => setIsAddingNew(false)}
-                onSuccess={() => {
-                  setIsAddingNew(false)
-                }}/>
-            )}
     </div>
   )
 }

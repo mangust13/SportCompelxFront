@@ -4,7 +4,8 @@ import TimePicker from 'react-time-picker'
 import 'react-time-picker/dist/TimePicker.css'
 import { toast } from 'react-toastify'
 import { highlightMatch } from '../../../utils/highlightMatch'
-import { TrainerFullScheduleDto, TrainerScheduleEntryDto } from '../../../utils/types'
+import { TrainerFullScheduleDto, TrainerScheduleEntryDto } from '../InternalDtos'
+import { dayOrder } from '../../../utils/types'
 
 type Props = {
   trainer: TrainerFullScheduleDto
@@ -27,9 +28,7 @@ export default function TrainerCard({ trainer, search, onDelete, onUpdate }: Pro
   const [startTime, setStartTime] = useState<string | null>('10:00')
   const [endTime, setEndTime] = useState<string | null>('12:00')
 
-  const dayOrder = [
-    'Понеділок', 'Вівторок', 'Середа', 'Четвер', 'Пʼятниця', 'Субота', 'Неділя'
-  ]
+  
 
   const groupedByDay = dayOrder.map(day => ({
     day,
