@@ -106,10 +106,7 @@ export default function AddPurchaseModal({ subscription, onClose, onSuccess }: P
     if (!confirm('Ви точно хочете видалити цього клієнта?')) return
 
     try {
-      await axios.delete(
-        `https://localhost:7270/api/Clients/${selectedClientId}`,
-        {headers: getAuthHeaders()}
-      )
+      await axios.delete(`https://localhost:7270/api/Clients/${selectedClientId}`, {headers: getAuthHeaders()})
       setClients(prev => prev.filter(c => c.clientId !== selectedClientId))
       setSelectedClientId(null)
       toast.success('Клієнт видалений!')

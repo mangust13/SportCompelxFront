@@ -197,6 +197,13 @@ export default function SubscriptionList() {
             expandedCardId={expandedCardId}
             setExpandedCardId={setExpandedCardId}
             onDelete={handleDeleteSubscription}
+            onUpdate={(updatedSub) =>
+            setSubscriptions(prev =>
+              prev.map(s =>
+                s.subscriptionId === updatedSub.subscriptionId ? updatedSub : s
+              )
+            )
+          }
           />
         ))}
       </div>

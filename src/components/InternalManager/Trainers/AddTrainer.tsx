@@ -1,17 +1,10 @@
 import { useState, useEffect } from 'react'
 import axios from 'axios'
 import { toast } from 'react-toastify'
+import { ActivityDto } from '../InternalDtos'
+import { SportComplexDto } from '../InternalDtos'
 
-type ActivityDto = {
-  activityId: number
-  activityName: string
-}
 
-type SportComplexDto = {
-  sportComplexId: number
-  city: string
-  address: string
-}
 
 type Props = {
   onClose: () => void

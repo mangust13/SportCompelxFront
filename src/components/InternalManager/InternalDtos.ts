@@ -7,6 +7,7 @@ export type PurchaseDto = {
     clientFullName: string
     clientGender: string
     clientPhoneNumber: string
+    subscriptionId: number
     subscriptionName: string
     subscriptionTotalCost: number
     subscriptionTerm: string
@@ -25,7 +26,13 @@ export type ClientDto = {
     clientPhoneNumber: string; 
     clientGender: string 
 }
-  
+
+  export type SportComplexDto = {
+  sportComplexId: number
+  city: string
+  address: string
+}
+
   export type SubscriptionDto = {
     subscriptionId: number
     subscriptionName: string

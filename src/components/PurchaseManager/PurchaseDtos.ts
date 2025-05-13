@@ -35,12 +35,16 @@ export type SupplierDto = {
 }
 
 export type BrandDto = { brandId: number, brandName: string }
+export type ProductTypeDto = { productTypeId: number, productTypeName: string }
+
 
 export type ProductDto = {
   productId: number
-  brandName: string
   productModel: string
-  productType: string
+  brandId: number
+  brandName: string
+  productTypeId: number
+  productTypeName: string
   productDescription: string
 }
 

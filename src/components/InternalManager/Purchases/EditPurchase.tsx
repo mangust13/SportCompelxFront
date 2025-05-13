@@ -1,75 +1,108 @@
 import { useState, useEffect } from 'react'
 import Select from 'react-select'
-import { PurchaseDto } from '../InternalDtos'
-import {ClientDto} from '../InternalDtos'
+import { PurchaseDto, ClientDto } from '../InternalDtos'
 import axios from 'axios'
 import { toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
+import { getAuthHeaders } from '../../../utils/authHeaders'
 
-type Props = { purchase: PurchaseDto; onClose: () => void; onSave: (updated: PurchaseDto) => void }
-type SubscriptionOption = { name: string; totalCost: number }
+type Props = {
+  purchase: PurchaseDto
+  onClose: () => void
+  onSave: (updated: PurchaseDto) => void
+}
+
+type SubscriptionOption = {
+  id: number
+  name: string
+  totalCost: number
+}
 
 export default function EditPurchase({ purchase, onClose, onSave }: Props) {
   const [edited, setEdited] = useState<PurchaseDto>(purchase)
   const [allSubscriptions, setAllSubscriptions] = useState<SubscriptionOption[]>([])
-  const [allPayments, setAllPayments] = useState<string[]>([])
   const [clients, setClients] = useState<ClientDto[]>([])
   const [selectedClientId, setSelectedClientId] = useState<number | null>(null)
+  const [allPayments, setAllPayments] = useState<string[]>(['Карта', 'Готівка'])
 
   useEffect(() => {
-    setEdited(purchase)
+  setEdited(purchase)
 
-    axios.get('https://localhost:7270/api/Purchases/subscriptions-names')
-      .then(res => setAllSubscriptions(res.data))
-      .catch(err => console.error('Помилка завантаження абонементів:', err))
+  axios.get('https://localhost:7270/api/Purchases/subscriptions-names')
+    .then(res => setAllSubscriptions(res.data))
+    .catch(err => console.error('Помилка завантаження абонементів:', err))
 
-    axios.get('https://localhost:7270/api/Clients')
-      .then(res => setClients(res.data))
-      .catch(err => console.error('Помилка завантаження клієнтів:', err))
-
-    setAllPayments(['Карта', 'Готівка'])
-  }, [purchase])
-
-  useEffect(() => {
-    const existingClient = clients.find(c => c.clientFullName === purchase.clientFullName)
-    if (existingClient) {
-      setSelectedClientId(existingClient.clientId)
-    }
-  }, [clients, purchase])
-  
+  axios.get('https://localhost:7270/api/Clients')
+    .then(res => {
+      setClients(res.data)
+      const existingClient = res.data.find(
+        (c: ClientDto) =>
+          c.clientFullName === purchase.clientFullName &&
+          c.clientPhoneNumber === purchase.clientPhoneNumber
+      )
+      if (existingClient) {
+        setSelectedClientId(existingClient.clientId)
+      }
+    })
+    .catch(err => console.error('Помилка завантаження клієнтів:', err))
+}, [purchase])
 
   const clientOptions = clients.map(c => ({
     value: c.clientId,
     label: `${c.clientFullName} (${c.clientPhoneNumber} • ${c.clientGender})`
   }))
 
+  const subscriptionOptions = allSubscriptions.map(s => ({
+    value: s.id,
+    label: `${s.name} — ${s.totalCost} грн`
+  }))
+
   const handleClientChange = (selected: any) => {
     if (selected) {
       const client = clients.find(c => c.clientId === selected.value)
-      if (client) {
+      if (client)
         setSelectedClientId(client.clientId)
-        handleChange('clientFullName', client.clientFullName)
-        handleChange('clientPhoneNumber', client.clientPhoneNumber)
-        handleChange('clientGender', client.clientGender)
-      }
-    } else {
-      setSelectedClientId(null)
-      handleChange('clientFullName', '')
-      handleChange('clientPhoneNumber', '')
-      handleChange('clientGender', '')
+      else
+        setSelectedClientId(null)
     }
   }
 
-  const handleChange = (field: keyof PurchaseDto, value: any) => { setEdited({ ...edited, [field]: value }) }
+  const handleSubscriptionChange = (selected: any) => {
+    if (selected) {
+      const subscription = allSubscriptions.find(s => s.id === selected.value)
+      if (subscription) {
+        handleChange('subscriptionId', subscription.id)
+        handleChange('subscriptionName', subscription.name)
+        handleChange('subscriptionTotalCost', subscription.totalCost)
+      }
+    } else {
+      handleChange('subscriptionId', 0)
+      handleChange('subscriptionName', '')
+      handleChange('subscriptionTotalCost', 0)
+    }
+  }
+
+  const handleChange = (field: keyof PurchaseDto, value: any) => {
+    setEdited(prev => ({ ...prev, [field]: value }))
+  }
 
   const handleSave = async () => {
+    if (!selectedClientId) {
+      toast.error('Оберіть клієнта')
+      return
+    }
+
     try {
-      const res = await axios.put<PurchaseDto>(`https://localhost:7270/api/Purchases/${purchase.purchaseId}`, {
+      const res = await axios.put<PurchaseDto>(
+        `https://localhost:7270/api/Purchases/${purchase.purchaseId}`, 
+        {
         clientId: selectedClientId,
         paymentMethod: edited.paymentMethod,
-        subscriptionName: edited.subscriptionName
-      })
-  
+        subscriptionId: edited.subscriptionId,
+        purchaseDate: edited.purchaseDate,
+        subscriptionTotalCost: edited.subscriptionTotalCost
+        },
+          {headers: getAuthHeaders()})
       toast.success('Покупку оновлено!')
       onSave(res.data)
       onClose()
@@ -81,7 +114,7 @@ export default function EditPurchase({ purchase, onClose, onSave }: Props) {
 
   return (
     <div className="fixed inset-0 z-50 flex justify-center items-center bg-black bg-opacity-40">
-      <div className="bg-white rounded-xl p-6 w-full max-w-3xl shadow-lg overflow-y-auto max-h-[90vh]">
+      <div className="bg-white rounded-xl p-6 w-full max-w-3xl shadow-lg overflow-y-auto max-h-[120vh]">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-bold text-primary">Редагування покупки</h2>
           <button onClick={onClose} className="text-2xl text-gray-500 hover:text-red-500">&times;</button>
@@ -93,7 +126,7 @@ export default function EditPurchase({ purchase, onClose, onSave }: Props) {
             <p className="font-semibold mb-1">Клієнт:</p>
             <Select
               options={clientOptions}
-              value={clientOptions.find(option => option.value === selectedClientId) || null}
+              value={clientOptions.find(opt => opt.value === selectedClientId) || null}
               onChange={handleClientChange}
               placeholder="Оберіть клієнта..."
               isClearable
@@ -101,34 +134,52 @@ export default function EditPurchase({ purchase, onClose, onSave }: Props) {
           </div>
 
           {/* Метод оплати */}
-          <select
-            value={edited.paymentMethod}
-            onChange={e => handleChange('paymentMethod', e.target.value)}
-            className="border p-2 rounded"
-          >
-            {allPayments.map(p => <option key={p}>{p}</option>)}
-          </select>
+          <div>
+            <p className="font-semibold mb-1">Метод оплати:</p>
+            <select
+              value={edited.paymentMethod}
+              onChange={e => handleChange('paymentMethod', e.target.value)}
+              className="border p-2 rounded w-full"
+            >
+              {allPayments.map(p => <option key={p}>{p}</option>)}
+            </select>
+          </div>
 
           {/* Абонемент */}
-          <select
-            value={edited.subscriptionName}
-            onChange={e => {
-              const selectedName = e.target.value
-              const selectedSub = allSubscriptions.find(s => s.name === selectedName)
-              handleChange('subscriptionName', selectedName)
-              if (selectedSub) handleChange('subscriptionTotalCost', selectedSub.totalCost)
-            }}
-            className="border p-2 rounded"
-          >
-            {allSubscriptions.map(s => (
-              <option key={s.name} value={s.name}>{s.name}</option>
-            ))}
-          </select>
-
-          {/* Вартість */}
-          <div className="font-semibold text-gray-700 mt-1 col-span-full">
-            Загальна вартість: {edited.subscriptionTotalCost} грн
+          <div>
+            <p className="font-semibold mb-1">Абонемент:</p>
+            <Select
+              options={subscriptionOptions}
+              value={subscriptionOptions.find(opt => opt.value === edited.subscriptionId) || null}
+              onChange={handleSubscriptionChange}
+              placeholder="Оберіть абонемент..."
+              isClearable
+            />
           </div>
+
+          {/* Дата покупки */}
+            <div>
+              <p className="font-semibold mb-1">Дата покупки:</p>
+              <input
+                type="date"
+                value={edited.purchaseDate.slice(0, 10)}
+                onChange={e => handleChange('purchaseDate', e.target.value)}
+                className="border p-2 rounded w-full"
+              />
+            </div>
+
+            {/* Вартість (ручне редагування) */}
+            <div>
+              <p className="font-semibold mb-1">Ціна абонемента:</p>
+              <input
+                type="number"
+                value={edited.subscriptionTotalCost}
+                onChange={e => handleChange('subscriptionTotalCost', parseFloat(e.target.value))}
+                className="border p-2 rounded w-full"
+                min={0}
+                step={0.01}
+              />
+            </div>
         </div>
 
         <div className="mt-6 flex justify-end gap-3">

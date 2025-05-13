@@ -1,11 +1,12 @@
 import { useState, useRef, useEffect } from 'react'
 import { SubscriptionDto } from '../InternalDtos'
 import { highlightMatch } from '../../../utils/highlightMatch'
-import EditPurchase from '../Purchases/EditPurchase'
+import EditSubscription from '../Subscriptions/EditSubscription'
 import AddPurchaseModal from './AddPurchase'
 import axios from 'axios'
 import { toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
+import { getAuthHeaders } from '../../../utils/authHeaders'
 
 type Props = {
   subscription: SubscriptionDto
@@ -13,9 +14,10 @@ type Props = {
   expandedCardId: number | null
   setExpandedCardId: (id: number | null) => void
   onDelete: (purchaseId: number) => void
+  onUpdate: (updated: SubscriptionDto) => void
 }
 
-export default function SubscriptionCard({ subscription, searchTerm, expandedCardId, setExpandedCardId, onDelete }: Props) {
+export default function SubscriptionCard({ subscription, searchTerm, expandedCardId, setExpandedCardId, onDelete, onUpdate }: Props) {
   const [isEditing, setIsEditing] = useState(false)
   const [isAddingPurchase, setIsAddingPurchase] = useState(false)
   const isExpanded = expandedCardId === subscription.subscriptionId
@@ -27,6 +29,7 @@ export default function SubscriptionCard({ subscription, searchTerm, expandedCar
 
   const handleSave = (updated: SubscriptionDto) => {
     setIsEditing(false)
+    onUpdate(updated)
   }
 
   const handleDelete = async () => {
@@ -37,7 +40,7 @@ export default function SubscriptionCard({ subscription, searchTerm, expandedCar
           <button
             onClick={async () => {
               try {
-                await axios.delete(`https://localhost:7270/api/Subscriptions/${subscription.subscriptionId}`)
+                await axios.delete(`https://localhost:7270/api/Subscriptions/${subscription.subscriptionId}`, {headers: getAuthHeaders()})
                 toast.success('Абонемент успішно видалений!')
                 onDelete(subscription.subscriptionId)
                 toast.dismiss(toastId)
@@ -159,14 +162,14 @@ export default function SubscriptionCard({ subscription, searchTerm, expandedCar
           onSuccess={() => setIsAddingPurchase(false)}
         />
       )}
-      {/* Модальне вікно редагування підписки */}
-      {/* {isEditing && (
-        <EditPurchaseModal
+
+      {isEditing && (
+        <EditSubscription
           subscription={subscription}
           onClose={() => setIsEditing(false)}
           onSave={handleSave}
         />
-      )} */}
+      )}
     </div>
   )
 }

@@ -55,7 +55,7 @@ export default function InventoryList() {
         products: items.map(i => ({
           brandName: i.brandName,
           productModel: i.productModel,
-          productType: i.productType,
+          productType: i.productTypeName,
           quantity: i.quantity
         }))
       }))

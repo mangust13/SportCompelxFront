@@ -5,6 +5,7 @@ import EditPurchase from './EditPurchase'
 import axios from 'axios'
 import { toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
+import { getAuthHeaders } from '../../../utils/authHeaders'
 
 type Props = {
   purchase: PurchaseDto
@@ -50,7 +51,7 @@ export default function PurchaseCard({
           <button
             onClick={async () => {
               try {
-                await axios.delete(`https://localhost:7270/api/Purchases/${localPurchase.purchaseId}`)
+                await axios.delete(`https://localhost:7270/api/Purchases/${localPurchase.purchaseId}`, {headers: getAuthHeaders()})
                 toast.success('Покупка успішно видалена!')
                 onDelete(localPurchase.purchaseId)
                 toast.dismiss(toastId)

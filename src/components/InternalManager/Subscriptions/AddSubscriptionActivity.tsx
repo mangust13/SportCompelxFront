@@ -110,11 +110,14 @@ export default function AddSubscriptionModal({ onClose, onSuccess }: Props) {
 
   const handleUpdateActivity = async () => {
     try {
-      await axios.put(`https://localhost:7270/api/Activities/${editingActivityId}`, {
+      await axios.put(
+        `https://localhost:7270/api/Activities/${editingActivityId}`, 
+        {
         activityName: editingFields.name,
         activityPrice: editingFields.price,
         activityDescription: editingFields.desc
-      })
+        },
+        {headers: getAuthHeaders()})
 
       setActivities(prev =>
         prev.map(a =>
@@ -140,10 +143,7 @@ export default function AddSubscriptionModal({ onClose, onSuccess }: Props) {
           <button
             onClick={async () => {
               try {
-                await axios.delete(
-                  `https://localhost:7270/api/Activities/${id}`,
-                  {headers: getAuthHeaders()}
-                )
+                await axios.delete(`https://localhost:7270/api/Activities/${id}`, {headers: getAuthHeaders()})
                 setActivities(prev => prev.filter(a => a.activityId !== id))
                 setSelectedActivities(prev => prev.filter(a => a.activity.activityId !== id))
                 toast.success('Активність видалена!')

@@ -3,6 +3,7 @@ import axios from 'axios'
 import { ProductDto, SupplierDto } from '../PurchaseDtos'
 import { toast } from 'react-toastify'
 import Select from 'react-select'
+import { getAuthHeaders } from '../../../utils/authHeaders'
 
 type Props = {
   product: ProductDto
@@ -108,7 +109,7 @@ export default function AddOrder({ product, onClose }: Props) {
     if (!confirm('Ви точно хочете видалити цього постачальника?')) return
 
     try {
-      await axios.delete(`https://localhost:7270/api/Suppliers/${selectedSupplierId}`)
+      await axios.delete(`https://localhost:7270/api/Suppliers/${selectedSupplierId}`, {headers: getAuthHeaders()})
       setSuppliers(prev => prev.filter(s => s.supplierId !== selectedSupplierId))
       setSelectedSupplierId(null)
       toast.success('Постачальника видалено!')

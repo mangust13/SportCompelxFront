@@ -6,6 +6,8 @@ import { toast } from 'react-toastify'
 import { highlightMatch } from '../../../utils/highlightMatch'
 import { TrainerFullScheduleDto, TrainerScheduleEntryDto } from '../InternalDtos'
 import { dayOrder } from '../../../utils/types'
+import EditTrainer from './EditTrainer'
+import { getAuthHeaders } from '../../../utils/authHeaders'
 
 type Props = {
   trainer: TrainerFullScheduleDto
@@ -27,8 +29,7 @@ export default function TrainerCard({ trainer, search, onDelete, onUpdate }: Pro
   const [activityId, setActivityId] = useState<number | null>(null)
   const [startTime, setStartTime] = useState<string | null>('10:00')
   const [endTime, setEndTime] = useState<string | null>('12:00')
-
-  
+  const [isEditingTrainer, setIsEditingTrainer] = useState(false)  
 
   const groupedByDay = dayOrder.map(day => ({
     day,
@@ -142,9 +143,42 @@ export default function TrainerCard({ trainer, search, onDelete, onUpdate }: Pro
     }
   }
 
+  const handleDeleteTrainer = async () => {
+  const toastId = toast.info(
+    <div>
+      Ви точно хочете видалити тренера {trainer.trainerFullName}?
+      <div className="flex gap-2 mt-2">
+        <button
+          onClick={async () => {
+            try {
+              await axios.delete(`https://localhost:7270/api/Trainers/${trainer.trainerId}`, {headers: getAuthHeaders()})
+              toast.success('Тренера успішно видалено!')
+              onDelete(trainer.trainerId)
+              toast.dismiss(toastId)
+            } catch (error) {
+              toast.error('Помилка при видаленні тренера.')
+              toast.dismiss(toastId)
+            }
+          }}
+          className="bg-red-500 text-white px-2 py-1 rounded text-xs"
+        >
+          Так, видалити
+        </button>
+        <button
+          onClick={() => toast.dismiss(toastId)}
+          className="bg-gray-300 px-2 py-1 rounded text-xs"
+        >
+          Скасувати
+        </button>
+      </div>
+    </div>,
+    { autoClose: false }
+  )
+}
+
   const handleDeleteSchedule = async (scheduleId: number) => {
     try {
-      await axios.delete(`https://localhost:7270/api/Trainers/TrainerSchedules/${scheduleId}`)
+      await axios.delete(`https://localhost:7270/api/Trainers/TrainerSchedules/${scheduleId}`, {headers: getAuthHeaders()})
       toast.success('Запис видалено!')
       const updatedTrainer = {
         ...trainer,
@@ -161,8 +195,19 @@ export default function TrainerCard({ trainer, search, onDelete, onUpdate }: Pro
       <div className="flex justify-between items-start">
         <h3 className="font-bold text-lg text-primary">{highlightMatch(trainer.trainerFullName, search)}</h3>
         <div className="flex gap-2">
-          <button title="Редагувати" className="text-yellow-500 hover:text-yellow-600">✏️</button>
-          <button title="Видалити" className="text-red-500 hover:text-red-600" onClick={() => onDelete(trainer.trainerId)}>🗑️</button>
+          <button
+            title="Редагувати"
+            className="text-yellow-500 hover:text-yellow-600"
+            onClick={() => setIsEditingTrainer(true)}
+          >
+            ✏️
+          </button>
+          <button
+            title="Видалити"
+            className="text-red-500 hover:text-red-600"
+            onClick={handleDeleteTrainer}>
+            🗑️
+          </button>
         </div>
       </div>
 
@@ -197,7 +242,13 @@ export default function TrainerCard({ trainer, search, onDelete, onUpdate }: Pro
                     <td className="border p-1">{entry.startTime}</td>
                     <td className="border p-1">{entry.endTime}</td>
                     <td className="border p-1 flex justify-center gap-1">
-                      <button title="Редагувати" className="text-yellow-500 hover:text-yellow-600 text-sm">✏️</button>
+                      <button
+                        title="Редагувати"
+                        className="text-yellow-500 hover:text-yellow-600"
+                        onClick={() => setIsEditingTrainer(true)}
+                      >
+                        ✏️
+                      </button>
                       <button
                         title="Видалити"
                         className="text-red-500 hover:text-red-600 text-sm"
@@ -234,6 +285,14 @@ export default function TrainerCard({ trainer, search, onDelete, onUpdate }: Pro
           </div>
         </div>
       </div>
+      {isEditingTrainer && (
+        <EditTrainer
+          trainer={trainer}
+          onClose={() => setIsEditingTrainer(false)}
+          onSave={onUpdate}
+        />
+      )}
+
     </div>
   )
 }

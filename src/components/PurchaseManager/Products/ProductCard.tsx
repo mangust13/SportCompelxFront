@@ -5,6 +5,7 @@ import AddOrder from './AddOrder'
 import axios from 'axios'
 import { toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
+import { getAuthHeaders } from '../../../utils/authHeaders'
 
 type Props = {
   product: ProductDto
@@ -31,7 +32,7 @@ export default function ProductCard({ product, searchTerm, expandedCardId, setEx
           <button
             onClick={async () => {
               try {
-                await axios.delete(`https://localhost:7270/api/Products/${product.productId}`)
+                await axios.delete(`https://localhost:7270/api/Products/${product.productId}`, {headers: getAuthHeaders()})
                 toast.success('Продукт успішно видалено!')
                 onDelete(product.productId)
                 toast.dismiss(toastId)
@@ -70,13 +71,13 @@ export default function ProductCard({ product, searchTerm, expandedCardId, setEx
   }, [isExpanded])
 
   const typeToImageMap: Record<string, string> = {
-  'Кардіотренажери': './assets/cardio.jpg',
-  'Силові тренажери': './assets/strength.jpg',
-  'Боксерське спорядження': './assets/boxing.jpg',
-  'Йога та пілатес': './assets/yoga.jpg',
+  'Кардіотренажери': '/assets/cardio.jpg',
+  'Силові тренажери': '/assets/strength.jpg',
+  'Боксерське спорядження': '/assets/boxing.jpg',
+  'Йога та пілатес': '/assets/yoga.jpg',
   'Обладнання для кросфіту': '/assets/crossfit.jpg'
 }
-  const imageUrl = typeToImageMap[product.productType] || '/images/default.jpg'
+  const imageUrl = typeToImageMap[product.productTypeName] || '/images/default.jpg'
 
   return (
     <div className="bg-white shadow-md rounded-xl p-4 flex flex-col gap-2">
@@ -103,7 +104,7 @@ export default function ProductCard({ product, searchTerm, expandedCardId, setEx
         Бренд: {highlightMatch(product.brandName, searchTerm)}
       </p>
       <p className="text-sm text-gray-700">
-        Тип продукту: {highlightMatch(product.productType, searchTerm)}
+        Тип продукту: {highlightMatch(product.productTypeName, searchTerm)}
       </p>
 
       {!isExpanded ? (
