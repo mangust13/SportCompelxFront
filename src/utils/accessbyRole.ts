@@ -10,8 +10,8 @@ export const accessbyRole = {
     ],
     PurchaseManager: [
         "Поставки",
-        "Постачальники",
         "Типи продуктів",
+        "Інвентар у залі"
       ]
   } as const
 

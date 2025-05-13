@@ -1,32 +1,51 @@
-import { useState } from 'react';
-import { highlightMatch } from '../../../utils/highlightMatch';
-import { OrderDto } from '../PurchaseDtos';
+import { useState } from 'react'
+import { highlightMatch } from '../../../utils/highlightMatch'
+import { OrderDto } from '../PurchaseDtos'
 
 type Props = {
-  order: OrderDto;
-  search: string;
-  expandedCardId: number | null;
-  setExpandedCardId: (id: number | null) => void;
-};
+  order: OrderDto
+  search: string
+  expandedCardId: number | null
+  setExpandedCardId: (id: number | null) => void
+}
 
 export default function OrderCard({ order, search, expandedCardId, setExpandedCardId }: Props) {
-  const isExpanded = expandedCardId === order.orderId;
+  const isExpanded = expandedCardId === order.orderId
 
   const handleExpandToggle = () => {
-    setExpandedCardId(isExpanded ? null : order.orderId);
-  };
+    setExpandedCardId(isExpanded ? null : order.orderId)
+  }
 
   const statusColor =
     order.orderStatus === 'Виконане'
       ? 'bg-green-500'
       : order.orderStatus === 'В процесі'
       ? 'bg-yellow-500'
-      : 'bg-gray-500';
+      : 'bg-gray-500'
 
   return (
-    <div className={`bg-white shadow-md rounded-xl p-4 border-2 w-full overflow-x-auto ${order.orderStatus === 'Виконане' ? 'border-green-500' : order.orderStatus === 'В процесі' ? 'border-yellow-500' : 'border-gray-500'}`}>
+    <div
+      className={`relative bg-white shadow-md rounded-xl p-4 border-2 w-full overflow-x-auto ${
+        order.orderStatus === 'Виконане'
+          ? 'border-green-500'
+          : order.orderStatus === 'В процесі'
+          ? 'border-yellow-500'
+          : 'border-gray-500'
+      }`}
+    >
+      {/* Шапка */}
+      <div
+        className={`absolute top-0 left-0 w-full rounded-t-xl text-center text-white text-sm font-semibold py-1 ${statusColor}`}
+      >
+        {order.orderStatus === 'Виконане'
+          ? 'Поставка завершена'
+          : order.orderStatus === 'В процесі'
+          ? 'Очікується доставка'
+          : 'Статус невідомий'}
+      </div>
+
       {/* Заголовок */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-2">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-2 mt-6">
         <div>
           <h2 className="text-xl font-bold">
             Замовлення №{highlightMatch(order.orderNumber.toString(), search)}
@@ -67,18 +86,31 @@ export default function OrderCard({ order, search, expandedCardId, setExpandedCa
           <tbody>
             {order.purchasedProducts.map((product) => (
               <tr key={product.purchasedProductId} className="hover:bg-gray-50">
-                <td className="border px-2 py-1 font-semibold">{highlightMatch(product.productName, search)}</td>
-                <td className="border px-2 py-1">{highlightMatch(product.quantity.toString(), search)}</td>
-                <td className="border px-2 py-1">{highlightMatch(product.unitPrice.toString(), search)} грн</td>
-                <td className="border px-2 py-1">{highlightMatch(product.brandName, search)}</td>
-                <td className="border px-2 py-1">{highlightMatch(product.productType, search)}</td>
+                <td className="border px-2 py-1 font-semibold">
+                  {highlightMatch(product.productName, search)}
+                </td>
+                <td className="border px-2 py-1">
+                  {highlightMatch(product.quantity.toString(), search)}
+                </td>
+                <td className="border px-2 py-1">
+                  {highlightMatch(product.unitPrice.toString(), search)} грн
+                </td>
+                <td className="border px-2 py-1">
+                  {highlightMatch(product.brandName, search)}
+                </td>
+                <td className="border px-2 py-1">
+                  {highlightMatch(product.productType, search)}
+                </td>
                 <td className="border px-2 py-1">
                   {product.deliveries.length > 0 ? (
                     <details>
                       <summary className="cursor-pointer text-blue-500">Показати</summary>
                       <ul className="mt-1 space-y-1 text-xs">
-                        {product.deliveries.map(delivery => (
-                          <li key={delivery.deliveryId} className="border p-1 rounded bg-gray-50">
+                        {product.deliveries.map((delivery) => (
+                          <li
+                            key={delivery.deliveryId}
+                            className="border p-1 rounded bg-gray-50"
+                          >
                             <p>📦 #{delivery.deliveryId}</p>
                             <p>Дата: {new Date(delivery.deliveryDate).toLocaleDateString()}</p>
                             <p>К-сть: {delivery.deliveredQuantity}</p>
@@ -97,5 +129,5 @@ export default function OrderCard({ order, search, expandedCardId, setExpandedCa
         </table>
       </div>
     </div>
-  );
+  )
 }

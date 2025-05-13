@@ -8,11 +8,11 @@ type Props = {
   const getAvatarByRole = (role: string): string => {
     switch (role) {
       case 'Trainer':
-        return './assets/Trainer.png';
+        return './assets/Roles/Trainer.png';
       case 'InternalManager':
-        return '/assets/InternalManager.png';
+        return '/assets/Roles/InternalManager.png';
       case 'PurchaseManager':
-        return '/assets/PurchaseManager.png';
+        return '/assets/Roles/PurchaseManager.png';
       default:
         return '/assets/default.png';
     }

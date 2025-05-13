@@ -2,10 +2,12 @@ import { useEffect, useState } from 'react'
 import axios from 'axios'
 import { ProductDto } from '../PurchaseDtos'
 import ProductCard from './ProductCard'
-import AddOrder from './AddOrder'
+import BasketModal from './BasketModal'
 import Header from '../../../layout/Header'
 import { ExportModal } from '../../ExportModal'
 import { exportData } from '../../../utils/exportData'
+import { toast } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
 
 export default function ProductList() {
   const [products, setProducts] = useState<ProductDto[]>([])
@@ -14,6 +16,9 @@ export default function ProductList() {
   const [expandedCardId, setExpandedCardId] = useState<number | null>(null)
   const [trigger, setTrigger] = useState(0)
   const [isExportModalOpen, setIsExportModalOpen] = useState(false)
+  const [isBasketModalOpen, setIsBasketModalOpen] = useState(false)
+
+  
 
   const handleDeleteProduct = (productId: number) => {
     setProducts(prev => prev.filter(p => p.productId !== productId))
@@ -25,6 +30,11 @@ export default function ProductList() {
     prod.productType.toLowerCase().includes(searchTerm.toLowerCase()) ||
     prod.productDescription.toLowerCase().includes(searchTerm.toLowerCase())
   )
+
+  const handleExportFormat = (format: string) => {
+    exportData(format, filteredProducts)
+    setIsExportModalOpen(false)
+  } 
 
   const fetchProducts = async () => {
     try {
@@ -51,8 +61,14 @@ export default function ProductList() {
         triggerSearch={() => setTrigger(prev => prev + 1)}
         onExportClick={() => setIsExportModalOpen(true)}
       >
-        {/* Тут можна додати фільтри, якщо треба */}
       </Header>
+
+    <button
+      onClick={() => setIsBasketModalOpen(true)}
+      className="fixed bottom-6 right-6 bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg hover:bg-green-700 z-50">
+      🧾 Оформити замовлення
+    </button>
+
 
       <div className={`grid gap-4 grid-cols-1 md:grid-cols-2 ${isFilterOpen ? 'xl:grid-cols-2' : 'xl:grid-cols-3'} items-start`}>
         {filteredProducts.map(prod => (
@@ -67,15 +83,30 @@ export default function ProductList() {
         ))}
       </div>
 
-      {/* {isAddingNew && (
-        <AddOrder
-          onClose={() => setIsAddingNew(false)}
-          onSuccess={() => {
-            fetchProducts()
-            setIsAddingNew(false)
+      {isBasketModalOpen && (
+        <BasketModal
+          onClose={() => setIsBasketModalOpen(false)}
+          onConfirm={async () => {
+            const basket = JSON.parse(localStorage.getItem('basket') || '[]')
+            try {
+              await axios.post('https://localhost:7270/api/Orders/create-from-basket', basket)
+              localStorage.removeItem('basket')
+              toast.success('Замовлення оформлено успішно!')
+              setTrigger(prev => prev + 1)
+              setIsBasketModalOpen(false)
+            } catch (err) {
+              toast.error('Помилка при оформленні замовлення')
+            }
           }}
         />
-      )} */}
+      )}
+
+      {isExportModalOpen && (
+        <ExportModal
+          onClose={() => setIsExportModalOpen(false)}
+          onSelectFormat={handleExportFormat}
+        />
+      )}
     </div>
   )
 }

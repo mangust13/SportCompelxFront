@@ -1,26 +1,58 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import axios from 'axios'
-import { AttendanceRecordDto } from './TrainerDtos'
+import { AttendanceRecordDto, TrainerProfileDto } from './TrainerDtos'
 import AttendanceCard from './AttendanceCard'
 import Header from '../../layout/Header'
 import { ITEMS_PER_PAGE, renderPagination } from '../../utils/pagination'
 import { ExportModal } from '../ExportModal'
-import {exportData} from '../../utils/exportData'
-
+import { exportData } from '../../utils/exportData'
 
 export default function AttendanceList() {
   const [allAttendances, setAllAttendances] = useState<AttendanceRecordDto[]>([])
   const [currentPage, setCurrentPage] = useState(1)
   const [isFilterOpen, setIsFilterOpen] = useState(false)
   const [search, setSearchTerm] = useState('')
-  const [sortBy, setSortBy] = useState('attendanceDateTime')
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
+  const [sortBy, setSortBy] = useState<'purchaseNumber' | 'attendanceDateTime'>('attendanceDateTime')
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
   const [activityFilters, setActivityFilters] = useState<string[]>([])
   const [availableActivities, setAvailableActivities] = useState<string[]>([])
   const [purchaseNumberSearch, setPurchaseNumberSearch] = useState('')
   const [selectedDate, setSelectedDate] = useState<string>('')
-  const [trigger, setTrigger] = useState(0)
   const [isExportModalOpen, setIsExportModalOpen] = useState(false)
+
+  // load trainer's specializations once
+  useEffect(() => {
+    const user = JSON.parse(localStorage.getItem('user') || '{}')
+    axios
+      .get<TrainerProfileDto>(`https://localhost:7270/api/ConcreteTrainers/${user.trainerId}/profile`)
+      .then(res => setAvailableActivities(res.data.activities.map(a => a.activityName)))
+      .catch(err => console.error('Помилка завантаження профілю тренера:', err))
+  }, [])
+
+  // fetch function
+  const fetchAttendances = useCallback(async () => {
+    const user = JSON.parse(localStorage.getItem('user') || '{}')
+    const res = await axios.get<AttendanceRecordDto[]>(
+      'https://localhost:7270/api/attendanceRecord/attendances',
+      {
+        params: {
+          trainerId: user.trainerId,
+          sortBy,
+          order: sortOrder,
+          activities: activityFilters.join(','),
+          date: selectedDate || undefined,
+          purchaseNumber: purchaseNumberSearch || undefined
+        }
+      }
+    )
+    setAllAttendances(res.data)
+    setCurrentPage(1)
+  }, [sortBy, sortOrder, activityFilters, selectedDate, purchaseNumberSearch])
+
+  // initial load
+  useEffect(() => {
+    fetchAttendances()
+  }, [fetchAttendances])
 
   const filteredAttendances = allAttendances.filter(a =>
     a.purchaseNumber.toString().includes(search) ||
@@ -42,38 +74,7 @@ export default function AttendanceList() {
     setIsExportModalOpen(false)
   }
 
-  useEffect(() => {
-    axios.get('https://localhost:7270/api/Activities')
-      .then(res => {
-        const names = res.data.map((a: any) => a.activityName)
-        setAvailableActivities(names)
-      })
-      .catch(err => console.error('Помилка завантаження активностей:', err))
-  }, [])
-
-  useEffect(() => {
-    const user = JSON.parse(localStorage.getItem('user') || '{}')
-    const trainerId = user.trainerId
-
-    axios.get('https://localhost:7270/api/attendanceRecord/attendances', {
-      params: {
-        trainerId,
-        sortBy,
-        order: sortOrder,
-        activities: activityFilters.join(','),
-        date: selectedDate || undefined,
-        purchaseNumber: purchaseNumberSearch || undefined
-      }
-    })
-      .then(res => {
-        setAllAttendances(res.data)
-        setCurrentPage(1)
-      })
-      .catch(err => console.error('Помилка завантаження:', err))
-  }, [trigger, sortBy, sortOrder, activityFilters, selectedDate])
-
   const totalPages = Math.ceil(filteredAttendances.length / ITEMS_PER_PAGE)
-
   const visibleAttendances = filteredAttendances.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,
     currentPage * ITEMS_PER_PAGE
@@ -89,29 +90,26 @@ export default function AttendanceList() {
         searchTerm={search}
         setSearchTerm={setSearchTerm}
         sortBy={sortBy}
-        setSortBy={setSortBy}
+        setSortBy={value => setSortBy(value as any)}
         sortOrder={sortOrder}
-        setSortOrder={setSortOrder}
+        setSortOrder={value => setSortOrder(value as any)}
         sortOptions={[
           { value: 'purchaseNumber', label: 'Номер покупки' },
           { value: 'attendanceDateTime', label: 'Дата відвідування' }
         ]}
-        triggerSearch={() => setTrigger(prev => prev + 1)}
+        triggerSearch={fetchAttendances}
         onExportClick={() => setIsExportModalOpen(true)}
       >
         <div className="flex flex-col gap-4 text-sm text-gray-700">
-          {/* Date filter */}
           <div>
             <p className="font-semibold mb-1">Дата відвідування:</p>
             <input
               type="date"
               value={selectedDate}
-              onChange={(e) => setSelectedDate(e.target.value)}
+              onChange={e => setSelectedDate(e.target.value)}
               className="border rounded px-2 py-1 w-full"
             />
           </div>
-
-          {/* Activities */}
           <div>
             <p className="font-semibold mb-1">Види активностей:</p>
             <div className="flex flex-col gap-1 max-h-40 overflow-y-auto">
@@ -133,22 +131,18 @@ export default function AttendanceList() {
               ))}
             </div>
           </div>
-
-          {/* Номер покупки */}
           <div>
             <p className="font-semibold mb-1">Номер покупки:</p>
             <input
               type="text"
               value={purchaseNumberSearch}
-              onChange={(e) => setPurchaseNumberSearch(e.target.value)}
+              onChange={e => setPurchaseNumberSearch(e.target.value)}
               className="border rounded px-2 py-1 w-full"
               placeholder="Введіть номер покупки"
             />
           </div>
-
-
           <button
-            onClick={() => setTrigger(prev => prev + 1)}
+            onClick={fetchAttendances}
             className="mt-4 bg-primary text-white w-full py-2 rounded hover:opacity-90"
           >
             Застосувати фільтри
@@ -159,7 +153,7 @@ export default function AttendanceList() {
       <div className={`grid gap-4 grid-cols-1 md:grid-cols-2 ${isFilterOpen ? 'xl:grid-cols-2' : 'xl:grid-cols-3'} items-start`}>
         {visibleAttendances.map(a => (
           <AttendanceCard
-            key={a.attendanceId}
+            key={`${a.purchaseNumber}-${a.attendanceDateTime}`}
             attendance={a}
             search={search}
           />
@@ -191,10 +185,7 @@ export default function AttendanceList() {
       </div>
 
       {isExportModalOpen && (
-        <ExportModal
-          onClose={() => setIsExportModalOpen(false)}
-          onSelectFormat={handleExportFormat}
-        />
+        <ExportModal onClose={() => setIsExportModalOpen(false)} onSelectFormat={handleExportFormat} />
       )}
     </div>
   )

@@ -25,7 +25,7 @@ type FilterHeaderProps = {
       <div className="relative bg-white shadow-sm p-4 rounded-xl flex flex-col gap-4">
         <div className="flex flex-wrap justify-between items-center">
           <h2 className="text-lg font-bold text-primary">
-            {title}: {total}
+            {title && total > 0 ?  `${title}: ${total}` : ''}
           </h2>
   
           <div className="flex items-center gap-2">

@@ -1,4 +1,3 @@
-
 import { useState, useRef, useEffect } from 'react'
 import { ProductDto } from '../PurchaseDtos'
 import { highlightMatch } from '../../../utils/highlightMatch'
@@ -14,15 +13,6 @@ type Props = {
   setExpandedCardId: (id: number | null) => void
   onDelete: (productId: number) => void
 }
-
-const typeToQueryMap: Record<string, string> = {
-  'Кардіотренажери': 'cardio equipment',
-  'Силові тренажери': 'strength equipment',
-  'Боксерське спорядження': 'boxing equipment',
-  'Йога та пілатес': 'yoga pilates',
-  'Обладнання для кросфіту': 'crossfit equipment'
-}
-
 
 export default function ProductCard({ product, searchTerm, expandedCardId, setExpandedCardId, onDelete }: Props) {
   const [isAddingOrder, setIsAddingOrder] = useState(false)
@@ -79,15 +69,24 @@ export default function ProductCard({ product, searchTerm, expandedCardId, setEx
     }
   }, [isExpanded])
 
-  const query = typeToQueryMap[product.productType] || 'gym equipment'
-  const imageUrl = `https://source.unsplash.com/400x300/?${encodeURIComponent(query)}`
+  const typeToImageMap: Record<string, string> = {
+  'Кардіотренажери': './assets/cardio.jpg',
+  'Силові тренажери': './assets/strength.jpg',
+  'Боксерське спорядження': './assets/boxing.jpg',
+  'Йога та пілатес': './assets/yoga.jpg',
+  'Обладнання для кросфіту': '/assets/crossfit.jpg'
+}
+  const imageUrl = typeToImageMap[product.productType] || '/images/default.jpg'
 
   return (
     <div className="bg-white shadow-md rounded-xl p-4 flex flex-col gap-2">
+      <div className="flex justify-center">
         <img
-            src={imageUrl}
-            alt={product.productModel}
-            className="w-full h-48 object-cover rounded-lg"/>
+          src={imageUrl}
+          alt={product.productModel}
+          className="w-[30%] h-auto object-cover rounded-lg mx-auto"
+        />
+      </div>
       <div className="flex justify-between items-start text-sm text-gray-500">
         <h3 className="text-lg font-bold text-primary">
           {highlightMatch(product.productModel, searchTerm)}
@@ -134,16 +133,15 @@ export default function ProductCard({ product, searchTerm, expandedCardId, setEx
         className="mt-2 bg-green-600 text-white px-4 py-1 rounded hover:bg-green-700"
         onClick={() => setIsAddingOrder(true)}
       >
-        Замовити
+        Додати в замовлення
       </button>
 
-      {/* {isAddingOrder && (
+      {isAddingOrder && (
         <AddOrder
           product={product}
           onClose={() => setIsAddingOrder(false)}
-          onSuccess={() => setIsAddingOrder(false)}
         />
-      )} */}
+      )}
     </div>
   )
 }
