@@ -6,6 +6,10 @@ import Header from '../../layout/Header'
 import { ITEMS_PER_PAGE, renderPagination } from '../../utils/pagination'
 import { ExportModal } from '../ExportModal'
 import { exportData } from '../../utils/exportData'
+import { toast } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
+import { getAuthHeaders } from '../../utils/authHeaders'
+import EditAttendance from './EditAttendance'
 
 export default function AttendanceList() {
   const [allAttendances, setAllAttendances] = useState<AttendanceRecordDto[]>([])
@@ -13,14 +17,14 @@ export default function AttendanceList() {
   const [isFilterOpen, setIsFilterOpen] = useState(false)
   const [search, setSearchTerm] = useState('')
   const [sortBy, setSortBy] = useState<'purchaseNumber' | 'attendanceDateTime'>('attendanceDateTime')
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
   const [activityFilters, setActivityFilters] = useState<string[]>([])
   const [availableActivities, setAvailableActivities] = useState<string[]>([])
   const [purchaseNumberSearch, setPurchaseNumberSearch] = useState('')
   const [selectedDate, setSelectedDate] = useState<string>('')
   const [isExportModalOpen, setIsExportModalOpen] = useState(false)
+  const [editingAttendance, setEditingAttendance] = useState<AttendanceRecordDto | null>(null)
 
-  // load trainer's specializations once
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem('user') || '{}')
     axios
@@ -29,7 +33,6 @@ export default function AttendanceList() {
       .catch(err => console.error('Помилка завантаження профілю тренера:', err))
   }, [])
 
-  // fetch function
   const fetchAttendances = useCallback(async () => {
     const user = JSON.parse(localStorage.getItem('user') || '{}')
     const res = await axios.get<AttendanceRecordDto[]>(
@@ -73,6 +76,39 @@ export default function AttendanceList() {
     exportData(format, filteredAttendances)
     setIsExportModalOpen(false)
   }
+
+  const handleDelete = (attendance: AttendanceRecordDto) => {
+  const toastId = toast.info(
+    <div>
+      Ви точно хочете видалити запис відвідування {attendance.purchaseNumber}?
+      <div className="flex gap-2 mt-2">
+        <button
+          onClick={async () => {
+            try {
+              await axios.delete(`https://localhost:7270/api/AttendanceRecord/${attendance.attendanceId}`, { headers: getAuthHeaders() })
+              toast.success('Відвідування видалено!')
+              fetchAttendances()
+              toast.dismiss(toastId)
+            } catch {
+              toast.error('Помилка при видаленні.')
+              toast.dismiss(toastId)
+            }
+          }}
+          className="bg-red-500 text-white px-2 py-1 rounded text-xs"
+        >
+          Так, видалити
+        </button>
+        <button
+          onClick={() => toast.dismiss(toastId)}
+          className="bg-gray-300 px-2 py-1 rounded text-xs"
+        >
+          Скасувати
+        </button>
+      </div>
+    </div>,
+    { autoClose: false }
+  )
+}
 
   const totalPages = Math.ceil(filteredAttendances.length / ITEMS_PER_PAGE)
   const visibleAttendances = filteredAttendances.slice(
@@ -156,6 +192,8 @@ export default function AttendanceList() {
             key={`${a.purchaseNumber}-${a.attendanceDateTime}`}
             attendance={a}
             search={search}
+            onEdit={() => setEditingAttendance(a)}
+            onDelete={() => handleDelete(a)}
           />
         ))}
       </div>
@@ -187,6 +225,15 @@ export default function AttendanceList() {
       {isExportModalOpen && (
         <ExportModal onClose={() => setIsExportModalOpen(false)} onSelectFormat={handleExportFormat} />
       )}
+
+      {editingAttendance && (
+      <EditAttendance
+        attendance={editingAttendance}
+        onClose={() => setEditingAttendance(null)}
+        onSave={() => {
+          fetchAttendances()
+          setEditingAttendance(null)}}/>
+    )}
     </div>
   )
 }

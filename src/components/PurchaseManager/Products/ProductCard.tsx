@@ -6,6 +6,7 @@ import axios from 'axios'
 import { toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import { getAuthHeaders } from '../../../utils/authHeaders'
+import EditProduct from './EditProduct'
 
 type Props = {
   product: ProductDto
@@ -13,12 +14,14 @@ type Props = {
   expandedCardId: number | null
   setExpandedCardId: (id: number | null) => void
   onDelete: (productId: number) => void
+  onUpdate: (updated: ProductDto) => void
 }
 
-export default function ProductCard({ product, searchTerm, expandedCardId, setExpandedCardId, onDelete }: Props) {
+export default function ProductCard({ product, searchTerm, expandedCardId, setExpandedCardId, onDelete, onUpdate }: Props) {
   const [isAddingOrder, setIsAddingOrder] = useState(false)
   const isExpanded = expandedCardId === product.productId
   const contentRef = useRef<HTMLDivElement>(null)
+  const [isEditing, setIsEditing] = useState(false)
 
   const handleExpandToggle = () => {
     setExpandedCardId(isExpanded ? null : product.productId)
@@ -32,6 +35,7 @@ export default function ProductCard({ product, searchTerm, expandedCardId, setEx
           <button
             onClick={async () => {
               try {
+                console.log(product)
                 await axios.delete(`https://localhost:7270/api/Products/${product.productId}`, {headers: getAuthHeaders()})
                 toast.success('Продукт успішно видалено!')
                 onDelete(product.productId)
@@ -88,16 +92,24 @@ export default function ProductCard({ product, searchTerm, expandedCardId, setEx
           className="w-[30%] h-auto object-cover rounded-lg mx-auto"
         />
       </div>
-      <div className="flex justify-between items-start text-sm text-gray-500">
+      <div className="flex justify-between items-center text-sm text-gray-500">
         <h3 className="text-lg font-bold text-primary">
           {highlightMatch(product.productModel, searchTerm)}
         </h3>
-        <button
-          className="text-gray-400 hover:text-red-500 ml-10"
-          title="Видалити"
-          onClick={handleDelete}>
-          🗑️
-        </button>
+        <div className="flex gap-2">
+          <button
+            className="text-gray-400 hover:text-yellow-500"
+            title="Редагувати"
+            onClick={() => setIsEditing(true)}>
+            ✏️
+          </button>
+          <button
+            className="text-gray-400 hover:text-red-500"
+            title="Видалити"
+            onClick={handleDelete}>
+            🗑️
+          </button>
+        </div>
       </div>
 
       <p className="text-sm text-gray-700">
@@ -143,6 +155,18 @@ export default function ProductCard({ product, searchTerm, expandedCardId, setEx
           onClose={() => setIsAddingOrder(false)}
         />
       )}
+
+      {isEditing && (
+      <EditProduct
+        product={product}
+        onClose={() => setIsEditing(false)}
+        onSave={(updated) => {
+          onUpdate(updated)
+          setIsEditing(false)
+          setExpandedCardId(null)
+        }}
+      />
+    )}
     </div>
   )
 }

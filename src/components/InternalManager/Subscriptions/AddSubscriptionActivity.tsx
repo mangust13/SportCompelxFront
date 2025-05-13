@@ -20,7 +20,7 @@ type Props = {
   onSuccess: () => void
 }
 
-export default function AddSubscriptionModal({ onClose, onSuccess }: Props) {
+export default function AddSubscription({ onClose, onSuccess }: Props) {
   const [term, setTerm] = useState(TERMS[0].value)
   const [visitTime, setVisitTime] = useState(VISIT_TIMES[0])
   const [activities, setActivities] = useState<ActivityDto[]>([])

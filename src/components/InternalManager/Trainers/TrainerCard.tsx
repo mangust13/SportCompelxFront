@@ -4,10 +4,11 @@ import TimePicker from 'react-time-picker'
 import 'react-time-picker/dist/TimePicker.css'
 import { toast } from 'react-toastify'
 import { highlightMatch } from '../../../utils/highlightMatch'
-import { TrainerFullScheduleDto, TrainerScheduleEntryDto } from '../InternalDtos'
+import { TrainerFullScheduleDto, TrainerScheduleEntryDto, ActivityDto  } from '../InternalDtos'
 import { dayOrder } from '../../../utils/types'
 import EditTrainer from './EditTrainer'
 import { getAuthHeaders } from '../../../utils/authHeaders'
+import EditSchedule from './EditSchedule'
 
 type Props = {
   trainer: TrainerFullScheduleDto
@@ -16,10 +17,6 @@ type Props = {
   onUpdate: (updatedTrainer: TrainerFullScheduleDto) => void
 }
 
-type ActivityDto = {
-  activityId: number
-  activityName: string
-}
 
 export default function TrainerCard({ trainer, search, onDelete, onUpdate }: Props) {
   const [isExpanded, setIsExpanded] = useState(false)
@@ -30,6 +27,7 @@ export default function TrainerCard({ trainer, search, onDelete, onUpdate }: Pro
   const [startTime, setStartTime] = useState<string | null>('10:00')
   const [endTime, setEndTime] = useState<string | null>('12:00')
   const [isEditingTrainer, setIsEditingTrainer] = useState(false)  
+  const [editingSchedule, setEditingSchedule] = useState<TrainerScheduleEntryDto | null>(null)
 
   const groupedByDay = dayOrder.map(day => ({
     day,
@@ -110,13 +108,17 @@ export default function TrainerCard({ trainer, search, onDelete, onUpdate }: Pro
     }
 
     try {
-      const response = await axios.post('https://localhost:7270/api/Trainers/TrainerSchedules', {
-        trainerId: trainer.trainerId,
-        dayName: selectedDay,
-        activityId,
-        startTime,
-        endTime
-      })
+      const response = await axios.post(
+        'https://localhost:7270/api/Trainers/TrainerSchedules', 
+        {
+          trainerId: trainer.trainerId,
+          dayName: selectedDay,
+          activityId,
+          startTime,
+          endTime
+        },
+        {headers: getAuthHeaders() } 
+      )
 
       const newScheduleId = response.data.scheduleId
 
@@ -244,16 +246,14 @@ export default function TrainerCard({ trainer, search, onDelete, onUpdate }: Pro
                     <td className="border p-1 flex justify-center gap-1">
                       <button
                         title="Редагувати"
-                        className="text-yellow-500 hover:text-yellow-600"
-                        onClick={() => setIsEditingTrainer(true)}
-                      >
+                        className="text-yellow-500 hover:text-yellow-600 text-sm"
+                        onClick={() => setEditingSchedule(entry)}>
                         ✏️
                       </button>
                       <button
                         title="Видалити"
                         className="text-red-500 hover:text-red-600 text-sm"
-                        onClick={() => handleDeleteSchedule(entry.scheduleId)}
-                      >
+                        onClick={() => handleDeleteSchedule(entry.scheduleId)}>
                         🗑️
                       </button>
                     </td>
@@ -292,7 +292,20 @@ export default function TrainerCard({ trainer, search, onDelete, onUpdate }: Pro
           onSave={onUpdate}
         />
       )}
-
+      {editingSchedule && (
+        <EditSchedule
+          schedule={editingSchedule}
+          activities={activities}
+          onClose={() => setEditingSchedule(null)}
+          onSave={updated => {
+            const newSchedule = trainer.schedule.map(s =>
+              s.scheduleId === updated.scheduleId ? updated : s
+            )
+            onUpdate({...trainer, schedule: newSchedule})
+            setEditingSchedule(null)
+          }}
+        />
+      )}
     </div>
   )
 }

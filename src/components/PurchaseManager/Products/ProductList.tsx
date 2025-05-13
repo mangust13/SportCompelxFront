@@ -8,11 +8,8 @@ import { ExportModal } from '../../ExportModal'
 import { exportData } from '../../../utils/exportData'
 import { toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
-import {
-  ProductDto,
-  BrandDto,
-  ProductTypeDto
-} from '../PurchaseDtos'
+import { ProductDto, BrandDto, ProductTypeDto} from '../PurchaseDtos'
+import AddProduct from './AddProduct'
 
 export default function ProductList() {
   const [products, setProducts] = useState<ProductDto[]>([])
@@ -25,9 +22,9 @@ export default function ProductList() {
   const [brandFilter, setBrandFilter] = useState<number>(0)
   const [typeFilter, setTypeFilter] = useState<number>(0)
 
-  const [trigger, setTrigger] = useState(0)
   const [isExportModalOpen, setIsExportModalOpen] = useState(false)
   const [isBasketModalOpen, setIsBasketModalOpen] = useState(false)
+  const [isCreating, setIsCreating] = useState(false)
 
   useEffect(() => {
     axios.get<BrandDto[]>('https://localhost:7270/api/Products/all-brands')
@@ -47,6 +44,7 @@ export default function ProductList() {
           }
         }
       )
+      console.log('Products from API:', res.data)
       setProducts(res.data)
     } catch {
       toast.error('Помилка завантаження продуктів')
@@ -57,7 +55,6 @@ export default function ProductList() {
     fetchProducts()
   }, [])
 
-  // пошук і підсвітка залишаються на клієнті
   const filteredProducts = products.filter(p =>
     p.productModel.toLowerCase().includes(searchTerm.toLowerCase()) ||
     p.brandName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -83,6 +80,7 @@ export default function ProductList() {
         setSearchTerm={setSearchTerm}
         triggerSearch={fetchProducts}
         onExportClick={() => setIsExportModalOpen(true)}
+        onAddNew={() => setIsCreating(true)}
       >
         <div className="flex flex-col gap-4 text-sm text-gray-700">
           <div>
@@ -139,6 +137,11 @@ export default function ProductList() {
             expandedCardId={expandedCardId}
             setExpandedCardId={setExpandedCardId}
             onDelete={handleDeleteProduct}
+            onUpdate={(updated) => {
+              setProducts(prev =>
+                prev.map(p => p.productId === updated.productId ? updated : p)
+              )
+            }}
           />
         ))}
       </div>
@@ -165,6 +168,16 @@ export default function ProductList() {
         <ExportModal
           onClose={() => setIsExportModalOpen(false)}
           onSelectFormat={handleExportFormat}
+        />
+      )}
+
+      {isCreating && (
+        <AddProduct
+          onClose={() => setIsCreating(false)}
+          onSave={(created) => {
+            setProducts(prev => [...prev, created])
+            setIsCreating(false)
+          }}
         />
       )}
     </div>

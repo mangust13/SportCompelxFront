@@ -56,6 +56,7 @@ export default function EditPurchase({ purchase, onClose, onSave }: Props) {
     value: s.id,
     label: `${s.name} — ${s.totalCost} грн`
   }))
+  
 
   const handleClientChange = (selected: any) => {
     if (selected) {
@@ -96,11 +97,11 @@ export default function EditPurchase({ purchase, onClose, onSave }: Props) {
       const res = await axios.put<PurchaseDto>(
         `https://localhost:7270/api/Purchases/${purchase.purchaseId}`, 
         {
-        clientId: selectedClientId,
-        paymentMethod: edited.paymentMethod,
-        subscriptionId: edited.subscriptionId,
-        purchaseDate: edited.purchaseDate,
-        subscriptionTotalCost: edited.subscriptionTotalCost
+          clientId: selectedClientId,
+          paymentMethod: edited.paymentMethod,
+          subscriptionId: edited.subscriptionId,
+          purchaseDate: edited.purchaseDate,
+          subscriptionTotalCost: edited.subscriptionTotalCost
         },
           {headers: getAuthHeaders()})
       toast.success('Покупку оновлено!')

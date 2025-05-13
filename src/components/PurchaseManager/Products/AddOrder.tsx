@@ -84,11 +84,14 @@ export default function AddOrder({ product, onClose }: Props) {
     if (!selectedSupplierId) return
 
     try {
-      await axios.put(`https://localhost:7270/api/Suppliers/${selectedSupplierId}`, {
-        supplierName: editName,
-        supplierPhoneNumber: editPhone,
-        supplierLicense: editLicense
-      })
+      await axios.put(
+        `https://localhost:7270/api/Suppliers/${selectedSupplierId}`, 
+        {
+          supplierName: editName,
+          supplierPhoneNumber: editPhone,
+          supplierLicense: editLicense
+        },
+        {headers: getAuthHeaders()})
 
       setSuppliers(prev =>
         prev.map(s =>
@@ -120,7 +123,7 @@ export default function AddOrder({ product, onClose }: Props) {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white p-4 rounded-lg w-96 max-h-[95vh] overflow-y-auto">
+      <div className="bg-white p-4 rounded-lg w-96 h-[55vh] overflow-y-auto">
         <h2 className="text-lg font-bold mb-2">Додати до замовлення</h2>
         <p className="mb-2">Модель: {product.productModel}</p>
 

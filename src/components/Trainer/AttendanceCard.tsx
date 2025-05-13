@@ -1,16 +1,69 @@
 import { AttendanceRecordDto } from './TrainerDtos'
 import { highlightMatch } from '../../utils/highlightMatch'
+import { toast } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
+import { getAuthHeaders } from '../../utils/authHeaders'
+import axios from 'axios'
 
 type Props = {
   attendance: AttendanceRecordDto
   search: string
+  onEdit: () => void
+  onDelete: (id: number) => void
 }
 
-export default function AttendanceCard({ attendance, search }: Props) {
+export default function AttendanceCard({ attendance, search, onEdit, onDelete }: Props) {
+  const handleDelete = () => {
+    const toastId = toast.info(
+      <div>
+        Ви точно хочете видалити це відвідування клієнта <b>{attendance.clientFullName}</b>?
+        <div className="flex gap-2 mt-2">
+          <button
+            onClick={async () => {
+              try {
+                await axios.delete(`https://localhost:7270/api/AttendanceRecord/${attendance.attendanceId}`, {headers: getAuthHeaders()})
+                toast.success('Відвідування успішно видалено!')
+                onDelete(attendance.attendanceId)
+                toast.dismiss(toastId)
+              } catch {
+                toast.error('Помилка при видаленні')
+                toast.dismiss(toastId)
+              }
+            }}
+            className="bg-red-500 text-white px-2 py-1 rounded text-xs"
+          >
+            Так, видалити
+          </button>
+          <button
+            onClick={() => toast.dismiss(toastId)}
+            className="bg-gray-300 px-2 py-1 rounded text-xs"
+          >
+            Скасувати
+          </button>
+        </div>
+      </div>,
+      { autoClose: false }
+    )
+  }
+
   return (
     <div className="bg-white shadow-md rounded-xl p-3 flex flex-col gap-1 border border-gray-300">
       <div className="flex justify-between items-start text-sm text-gray-500">
         <span>{highlightMatch(`Покупка №${attendance.purchaseNumber}`, search)}</span>
+        <div className="flex gap-1 text-sm">
+          <button
+            title="Редагувати"
+            className="text-yellow-500 hover:text-yellow-600"
+            onClick={onEdit}>
+            ✏️
+          </button>
+          <button
+            title="Видалити"
+            className="text-red-500 hover:text-red-600"
+            onClick={handleDelete}>
+            🗑️
+          </button>
+        </div>
       </div>
 
       <div>

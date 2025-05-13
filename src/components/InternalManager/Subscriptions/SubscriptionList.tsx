@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import axios from 'axios'
 import { SubscriptionDto } from '../InternalDtos'
 import SubscriptionCard from './SubscriptionCard'
-import AddSubscriptionModal from './AddSubscriptionActivity'
+import AddSubscription from './AddSubscriptionActivity'
 import Header from '../../../layout/Header'
 import { ExportModal } from '../../ExportModal'
 import {exportData} from '../../../utils/exportData'
@@ -214,7 +214,7 @@ export default function SubscriptionList() {
         />
       )}
       {isAddingNew && (
-        <AddSubscriptionModal
+        <AddSubscription
           onClose={() => setIsAddingNew(false)}
           onSuccess={() => {
             fetchSubscriptions()
