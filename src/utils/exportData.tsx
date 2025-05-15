@@ -1,18 +1,30 @@
 import * as XLSX from 'xlsx'
 
-export function exportData<T>(format: string, data: T[]) {
+export function exportData<T extends Record<string, any>>(format: string, data: T[]) {
+  const cleanedData = data.map(removeIdFields)
+
   if (format === 'JSON') {
-    const json = JSON.stringify(data, null, 2)
+    const json = JSON.stringify(cleanedData, null, 2)
     downloadBlob(json, 'application/json', 'export.json')
   } else if (format === 'CSV') {
-    const csv = convertToCsv(data)
+    const csv = convertToCsv(cleanedData)
     downloadBlob('\uFEFF' + csv, 'text/csv;charset=utf-8;', 'export.csv')
   } else if (format === 'Excel') {
-    const worksheet = XLSX.utils.json_to_sheet(data)
+    const worksheet = XLSX.utils.json_to_sheet(cleanedData)
     const workbook = XLSX.utils.book_new()
     XLSX.utils.book_append_sheet(workbook, worksheet, 'Export')
     XLSX.writeFile(workbook, 'export.xlsx')
   }
+}
+
+function removeIdFields<T extends Record<string, any>>(item: T): T {
+  const newItem: Record<string, any> = {}
+  for (const key in item) {
+    if (!key.toLowerCase().includes('id')) {
+      newItem[key] = item[key]
+    }
+  }
+  return newItem as T
 }
 
 function downloadBlob(content: string, mime: string, filename: string) {

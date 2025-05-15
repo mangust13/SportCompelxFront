@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react'
 import axios from 'axios'
 import { ProductDto, SupplierDto } from '../PurchaseDtos'
 import { toast } from 'react-toastify'
-import Select from 'react-select'
 import { getAuthHeaders } from '../../../utils/authHeaders'
 
 type Props = {
@@ -31,33 +30,22 @@ export default function AddOrder({ product, onClose }: Props) {
       .catch(err => console.error('Помилка завантаження постачальників:', err))
   }, [])
 
-  const supplierOptions = suppliers.map(s => ({
-    value: s.supplierId,
-    label: `${s.supplierName} (${s.supplierPhoneNumber})`
-  }))
-
-  const handleSupplierChange = (option: any) => {
-    setSelectedSupplierId(option ? option.value : null)
-  }
-
   const handleAddToBasket = () => {
-    if (!selectedSupplierId) {
-      toast.error('Оберіть постачальника')
-      return
-    }
-
     const item = {
       productId: product.productId,
       productModel: product.productModel,
-      supplierId: selectedSupplierId,
-      quantity
+      quantity,
+      unitPrice: product.unitPrice
     }
 
     const existing = JSON.parse(localStorage.getItem('basket') || '[]')
     localStorage.setItem('basket', JSON.stringify([...existing, item]))
     toast.success('Додано в замовлення')
-    onClose()
+    setTimeout(() => {
+      onClose()
+    }, 100)
   }
+
 
   const handleAddSupplier = async () => {
     try {
@@ -123,19 +111,9 @@ export default function AddOrder({ product, onClose }: Props) {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white p-4 rounded-lg w-96 h-[55vh] overflow-y-auto">
+      <div className="bg-white p-4 rounded-lg w-96 max-h-[70vh] overflow-y-auto">
         <h2 className="text-lg font-bold mb-2">Додати до замовлення</h2>
         <p className="mb-2">Модель: {product.productModel}</p>
-
-        <label className="block mb-1 font-semibold">Постачальник:</label>
-        <Select
-          options={supplierOptions}
-          value={supplierOptions.find(option => option.value === selectedSupplierId) || null}
-          onChange={handleSupplierChange}
-          placeholder="Оберіть постачальника..."
-          isClearable
-          className="mb-2"
-        />
 
         {selectedSupplierId && (
           <div className="flex gap-2 mb-4">

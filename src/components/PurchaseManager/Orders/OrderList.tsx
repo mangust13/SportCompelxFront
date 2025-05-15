@@ -180,6 +180,9 @@ export default function OrderList() {
             search={search}
             expandedCardId={expandedCardId}
             setExpandedCardId={setExpandedCardId}
+            onUpdate={(updatedOrder) =>
+              setOrders(prev => prev.map(o => o.orderId === updatedOrder.orderId ? updatedOrder : o))
+            }
           />
         ))}
       </div>

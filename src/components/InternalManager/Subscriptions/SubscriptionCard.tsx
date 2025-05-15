@@ -132,7 +132,7 @@ export default function SubscriptionCard({ subscription, searchTerm, expandedCar
                 {subscription.activities.map((a, i) => (
                   <li key={i} className="border p-2 rounded-md bg-gray-50">
                     <p className="font-semibold">{highlightMatch(a.activityName, searchTerm)}</p>
-                    <p>Ціна: {a.activityPrice} грн</p>
+                    <p>Ціна за тренування: {a.activityPrice} грн</p>
                     <p>Кількість тренувань: {a.activityTypeAmount}</p>
                     <p className="text-xs text-gray-600">{highlightMatch(a.activityDescription || '', searchTerm)}</p>
                   </li>

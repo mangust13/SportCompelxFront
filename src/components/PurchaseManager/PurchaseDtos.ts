@@ -3,10 +3,13 @@ export type DeliveryDto = {
   deliveryDate: string
   deliveredQuantity: number
   gymNumber: number
+  complexAddress: string
+  complexCity: string
 }
 
 export type PurchasedProductDto = {
   purchasedProductId: number
+  productId: number
   productName: string
   quantity: number
   unitPrice: number
@@ -46,5 +49,6 @@ export type ProductDto = {
   productTypeId: number
   productTypeName: string
   productDescription: string
+  unitPrice: number
 }
 

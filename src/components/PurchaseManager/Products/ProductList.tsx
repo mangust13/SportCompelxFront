@@ -44,7 +44,6 @@ export default function ProductList() {
           }
         }
       )
-      console.log('Products from API:', res.data)
       setProducts(res.data)
     } catch {
       toast.error('Помилка завантаження продуктів')
@@ -149,17 +148,9 @@ export default function ProductList() {
       {isBasketModalOpen && (
         <BasketModal
           onClose={() => setIsBasketModalOpen(false)}
-          onConfirm={async () => {
-            const basket = JSON.parse(localStorage.getItem('basket') || '[]')
-            try {
-              await axios.post('/api/Orders/create-from-basket', basket)
-              localStorage.removeItem('basket')
-              toast.success('Замовлення оформлено успішно!')
-              fetchProducts()
-              setIsBasketModalOpen(false)
-            } catch {
-              toast.error('Помилка при оформленні замовлення')
-            }
+          onConfirm={() => {
+            fetchProducts()
+            setIsBasketModalOpen(false)
           }}
         />
       )}
