@@ -1,9 +1,13 @@
 import { useState, useEffect } from 'react'
 import axios from 'axios'
-import { TrainerFullScheduleDto } from '../InternalDtos'
+import { TrainerFullScheduleDto, SportComplexDto } from '../InternalDtos'
 import { toast } from 'react-toastify'
-import { SportComplexDto } from '../InternalDtos'
 import { getAuthHeaders } from '../../../utils/authHeaders'
+
+type Activity = {
+  activityId: number
+  activityName: string
+}
 
 type Props = {
   trainer: TrainerFullScheduleDto
@@ -19,6 +23,9 @@ export default function EditTrainer({ trainer, onClose, onSave }: Props) {
   const [sportComplexes, setSportComplexes] = useState<SportComplexDto[]>([])
   const [selectedComplexId, setSelectedComplexId] = useState<number | null>(null)
 
+  const [activities, setActivities] = useState<Activity[]>([])
+  const [selectedActivities, setSelectedActivities] = useState<number[]>([])
+
   useEffect(() => {
     axios.get<SportComplexDto[]>('https://localhost:7270/api/SportComplexes/all')
       .then(res => {
@@ -29,6 +36,15 @@ export default function EditTrainer({ trainer, onClose, onSave }: Props) {
         if (match) setSelectedComplexId(match.sportComplexId)
       })
       .catch(() => toast.error('Помилка завантаження спорткомплексів'))
+
+    axios.get<Activity[]>('https://localhost:7270/api/Activities')
+      .then(res => setActivities(res.data))
+      .catch(() => toast.error('Помилка завантаження активностей'))
+
+    axios.get<Activity[]>(`https://localhost:7270/api/Trainers/trainer/${trainer.trainerId}`)
+  .then(res => setSelectedActivities(res.data.map(a => a.activityId)))
+  .catch(() => toast.error('Помилка завантаження активностей тренера'))
+
   }, [trainer])
 
   const handleSave = async () => {
@@ -41,12 +57,14 @@ export default function EditTrainer({ trainer, onClose, onSave }: Props) {
       await axios.put(
         `https://localhost:7270/api/Trainers/${trainer.trainerId}`, 
         {
-            trainerFullName: fullName.trim(),
-            trainerPhoneNumber: phoneNumber.trim(),
-            gender,
-            sportComplexId: selectedComplexId
+          trainerFullName: fullName.trim(),
+          trainerPhoneNumber: phoneNumber.trim(),
+          gender,
+          sportComplexId: selectedComplexId,
+          activityIds: selectedActivities
         },
-        {headers: getAuthHeaders()})
+        { headers: getAuthHeaders() }
+      )
 
       const updatedTrainer: TrainerFullScheduleDto = {
         ...trainer,
@@ -63,6 +81,12 @@ export default function EditTrainer({ trainer, onClose, onSave }: Props) {
     } catch {
       toast.error('Помилка при оновленні')
     }
+  }
+
+  const toggleActivity = (id: number) => {
+    setSelectedActivities(prev =>
+      prev.includes(id) ? prev.filter(a => a !== id) : [...prev, id]
+    )
   }
 
   return (
@@ -86,7 +110,11 @@ export default function EditTrainer({ trainer, onClose, onSave }: Props) {
           className="border rounded px-3 py-2 text-sm"
         />
 
-        <select value={gender} onChange={(e) => setGender(e.target.value)} className="border px-3 py-2 rounded text-sm">
+        <select
+          value={gender}
+          onChange={(e) => setGender(e.target.value)}
+          className="border px-3 py-2 rounded text-sm"
+        >
           <option value="Чоловік">Чоловік</option>
           <option value="Жінка">Жінка</option>
         </select>
@@ -103,6 +131,22 @@ export default function EditTrainer({ trainer, onClose, onSave }: Props) {
             </option>
           ))}
         </select>
+
+        <div>
+          <p className="text-sm font-medium">Види активностей</p>
+          <div className="flex flex-wrap gap-2 mt-1">
+            {activities.map(a => (
+              <label key={a.activityId} className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={selectedActivities.includes(a.activityId)}
+                  onChange={() => toggleActivity(a.activityId)}
+                />
+                <span className="text-sm">{a.activityName}</span>
+              </label>
+            ))}
+          </div>
+        </div>
 
         <div className="flex justify-end gap-2 mt-4">
           <button onClick={onClose} className="text-gray-500 hover:underline">Скасувати</button>

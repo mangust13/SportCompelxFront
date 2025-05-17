@@ -117,13 +117,14 @@ export default function PurchaseCard({
           isActive ? 'bg-green-500' : 'bg-red-500'
         }`}
       >
-        {isActive ? 'Активний абонемент' : isExpired ? 'Термін дії закінчився' : 'Немає доступних тренувань'}
+        {isActive ? 'Активний абонемент' : 'Неактивний абонемент'}
       </div>
 
       {/* Верхній блок */}
       <div className="flex justify-between items-start text-sm text-gray-500 mt-6">
         <span>{highlightMatch(`Покупка №${localPurchase.purchaseNumber}`, search)}</span>
         <div className="flex items-center gap-2">
+        {isActive && (
           <button
             className="hover:text-yellow-500"
             title="Редагувати"
@@ -131,14 +132,15 @@ export default function PurchaseCard({
           >
             ✏️
           </button>
-          <button
-            className="hover:text-red-500"
-            title="Видалити"
-            onClick={handleDelete}
-          >
-            🗑️
-          </button>
-        </div>
+        )}
+        <button
+          className="hover:text-red-500"
+          title="Видалити"
+          onClick={handleDelete}
+        >
+          🗑️
+        </button>
+      </div>
       </div>
 
       {/* Абонемент */}

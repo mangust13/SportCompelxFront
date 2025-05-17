@@ -6,6 +6,7 @@ import AddSubscription from './AddSubscriptionActivity'
 import Header from '../../../layout/Header'
 import { ExportModal } from '../../ExportModal'
 import {exportData} from '../../../utils/exportData'
+import { toast } from 'react-toastify'
 
 export default function SubscriptionList() {
   const [subscriptions, setSubscriptions] = useState<SubscriptionDto[]>([])
@@ -45,6 +46,11 @@ export default function SubscriptionList() {
       a.activityName.toLowerCase().includes(searchTerm.toLowerCase())
     )
   )
+
+  useEffect(() => {
+  setMinCost(500)
+  setMaxCost(10000)
+}, [])
   
   useEffect(() => {
     axios.get('https://localhost:7270/api/Activities')
@@ -124,6 +130,8 @@ export default function SubscriptionList() {
           </div>
         </div>
 
+
+
         {/* Види активностей */}
         <div>
           <p className="font-semibold mb-1">Види активностей:</p>
@@ -179,7 +187,13 @@ export default function SubscriptionList() {
         </div>
 
         <button
-          onClick={() => setTrigger(prev => prev + 1)}
+          onClick={() => {
+            if (minCost !== null && maxCost !== null && maxCost < minCost) {
+              toast.error('Максимальна вартість не може бути меншою за мінімальну')
+              return
+            }
+            setTrigger(prev => prev + 1)
+          }}
           className="mt-4 bg-primary text-white w-full py-2 rounded hover:opacity-90"
         >
           Застосувати фільтри

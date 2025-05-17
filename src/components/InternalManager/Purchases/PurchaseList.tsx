@@ -6,7 +6,7 @@ import Header from '../../../layout/Header'
 import { ITEMS_PER_PAGE, renderPagination } from '../../../utils/pagination'
 import { ExportModal } from '../../ExportModal'
 import {exportData} from '../../../utils/exportData'
-
+import { toast } from 'react-toastify'
 
 export default function PurchaseList() {
   const [allPurchases, setAllPurchases] = useState<PurchaseDto[]>([])
@@ -86,6 +86,11 @@ export default function PurchaseList() {
     currentPage * ITEMS_PER_PAGE
   )
 
+  useEffect(() => {
+  setMinCost(500)
+  setMaxCost(10000)
+}, [])
+
   return (
     <div className={`flex flex-col gap-6 ${isFilterOpen ? 'w-[75%]' : 'w-[100%]'}`}>
       <Header
@@ -131,25 +136,38 @@ export default function PurchaseList() {
           </div>
 
           {/* Cost */}
-          <div>
-            <p className="font-semibold mb-1">Вартість абонемента (грн):</p>
-            <div className="flex gap-2">
-              <input
-                type="number"
-                placeholder="від"
-                value={minCost ?? ''}
-                onChange={(e) => setMinCost(e.target.value ? Number(e.target.value) : null)}
-                className="border rounded px-2 py-1 w-full"
-              />
-              <input
-                type="number"
-                placeholder="до"
-                value={maxCost ?? ''}
-                onChange={(e) => setMaxCost(e.target.value ? Number(e.target.value) : null)}
-                className="border rounded px-2 py-1 w-full"
-              />
+            <div>
+              <p className="font-semibold mb-1">Вартість абонемента (грн):</p>
+              <div className="flex gap-2">
+                <input
+                  type="number"
+                  placeholder="від"
+                  value={minCost ?? ''}
+                  onChange={(e) => {
+                    const value = e.target.value ? Number(e.target.value) : null
+                    if (value !== null && value < 1) {
+                      return
+                    }
+                    setMinCost(value)
+                  }}
+                  className="border rounded px-2 py-1 w-full"
+                />
+                <input
+                  type="number"
+                  placeholder="до"
+                  value={maxCost ?? ''}
+                  onChange={(e) => {
+                    const value = e.target.value ? Number(e.target.value) : null
+                    if (value !== null && minCost !== null && value <= minCost) {
+                      return
+                    }
+                    setMaxCost(value)
+                  }}
+                  className="border rounded px-2 py-1 w-full"
+                />
+              </div>
             </div>
-          </div>
+
 
           {/* Date */}
           <div>
@@ -200,7 +218,13 @@ export default function PurchaseList() {
           </div>
 
           <button
-            onClick={() => setTrigger(prev => prev + 1)}
+            onClick={() => {
+              if (minCost !== null && maxCost !== null && maxCost < minCost) {
+                toast.error('Максимальна вартість не може бути меншою за мінімальну')
+                return
+              }
+              setTrigger(prev => prev + 1)
+            }}
             className="mt-4 bg-primary text-white w-full py-2 rounded hover:opacity-90"
           >
             Застосувати фільтри

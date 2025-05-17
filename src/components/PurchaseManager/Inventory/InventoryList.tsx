@@ -3,6 +3,8 @@ import axios from 'axios'
 import Header from '../../../layout/Header'
 import ComplexCard, { ComplexInventory } from './ComplexCard'
 import { ProductDto } from '../PurchaseDtos'
+import { ExportModal } from '../../ExportModal'
+import { exportData } from '../../../utils/exportData'
 
 export interface InventoryDto extends ProductDto {
   complexAddress: string
@@ -17,6 +19,8 @@ export default function InventoryList() {
   const [searchTerm, setSearchTerm] = useState('')
   const [trigger, setTrigger] = useState(0)
   const [isExportModalOpen, setIsExportModalOpen] = useState(false)
+
+  
 
   useEffect(() => {
     axios
@@ -62,6 +66,11 @@ export default function InventoryList() {
     }))
   }, [inventory])
 
+  const handleExportFormat = (format: string) => {
+      exportData(format, inventory)
+      setIsExportModalOpen(false)
+    }
+
   return (
     <div className="flex flex-col gap-6">
       <Header
@@ -79,6 +88,10 @@ export default function InventoryList() {
           <ComplexCard key={`${c.complexAddress}-${c.cityName}`} complex={c} />
         ))}
       </div>
+      {isExportModalOpen && (
+        <ExportModal onClose={() => setIsExportModalOpen(false)} onSelectFormat={handleExportFormat} />
+      )}
     </div>
+
   )
 }

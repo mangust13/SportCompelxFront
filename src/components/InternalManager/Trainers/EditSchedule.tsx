@@ -23,8 +23,10 @@ const [endTime, setEndTime] = useState<string>('12:00')
 
 
   useEffect(() => {
-    const found = activities.find(a => a.activityName === schedule.activityName)
-    if (found) setActivityId(found.activityId)
+  const found = activities.find(a => a.activityName === schedule.activityName)
+  if (found) setActivityId(found.activityId)
+    setStartTime(schedule.startTime)
+    setEndTime(schedule.endTime)
   }, [schedule, activities])
 
   const handleSave = async () => {

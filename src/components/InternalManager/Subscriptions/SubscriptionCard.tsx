@@ -150,9 +150,8 @@ export default function SubscriptionCard({ subscription, searchTerm, expandedCar
       </div>
       <button
         className="mt-2 bg-green-600 text-white px-4 py-1 rounded hover:bg-green-700"
-        onClick={() => setIsAddingPurchase(true)}
-      >
-        Придбати
+        onClick={() => setIsAddingPurchase(true)}>
+        Продати
       </button>
 
       {isAddingPurchase && (
